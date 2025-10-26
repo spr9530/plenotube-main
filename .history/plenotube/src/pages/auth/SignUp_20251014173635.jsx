@@ -1,0 +1,126 @@
+import React, { useState } from 'react'
+import DefaultLayout from '../../layouts/default'
+import { Card } from '@heroui/card'
+import { Input } from '@heroui/input'
+import { FaRegEye } from "react-icons/fa6";
+import { FaRegEyeSlash } from "react-icons/fa6";
+import { Button } from '@heroui/button'
+import { SiSimplenote } from "react-icons/si";
+import { FaUserCircle } from "react-icons/fa";
+import { InputOtp } from "@heroui/input-otp"
+import { useAuth } from '../../context/AuthContext';
+import { useEffect } from 'react';
+
+function SignUp() {
+    const [isVisible, setIsVisible] = useState(false);
+
+    const toggleVisibility = () => setIsVisible(!isVisible);
+
+    const { handleRegister, isOtp, loading:authLoading } = useAuth();
+
+    
+
+    return (
+        <DefaultLayout>
+            <div className='h-full w-full flex items-center justify-center p-2'>
+                <Card className='h-full flex flex-col w-full lg:max-w-[30vw] items-center justify-between p-3 py-5 gap-4'>
+                    <div className='w-full flex flex-col items-center justify-center gap-2 mb-2'>
+                        <SiSimplenote className='text-xl font-semibold' />
+                        <h1 className='text-xl font-semibold'>PlenoTube</h1>
+                        <h2 className='text-md font-medium flex gap-2 items-center'> <FaUserCircle /> Create Your Account</h2>
+                    </div>
+                    <div className='flex flex-col w-full gap-4'>
+                        <div className='w-full flex flex-col '>
+                            <label htmlFor='full-name' className='mb-1 font-medium ml-1'>Full Name <span className='text-danger'>*</span></label>
+                            <Input
+                                id='full-name'
+                                type='text'
+                                placeholder='Enter your full name'
+                            />
+                        </div>
+                        <div className='w-full flex flex-col '>
+                            <label htmlFor='username' className='mb-1 font-medium ml-1'>Username <span className='text-danger'>*</span></label>
+                            <Input
+                                id='username'
+                                type='text'
+                                placeholder='Choose a username'
+                            />
+                        </div>
+                        <div className='w-full flex flex-col '>
+                            <label htmlFor='email' className='mb-1 font-medium ml-1'>Email <span className='text-danger'>*</span></label>
+                            <Input
+                                id='email'
+                                type='mail'
+                                placeholder='sample@gamil.com'
+                            />
+                        </div>
+                        <div className='w-full flex flex-col '>
+                            <label htmlFor='password' className='mb-1 font-medium ml-1'>Password <span className='text-danger'>*</span></label>
+                            <Input
+                                endContent={
+                                    <button
+                                        aria-label="toggle password visibility"
+                                        className="focus:outline-solid outline-transparent cursor-pointer"
+                                        type="button"
+                                        onClick={toggleVisibility}
+                                    >
+                                        {isVisible ? (
+                                            <FaRegEye className="text-2xl text-default-400 pointer-events-none cursor-pointer" />
+                                        ) : (
+                                            <FaRegEyeSlash className="text-2xl text-default-400 pointer-events-none cursor-pointer" />
+                                        )}
+                                    </button>}
+                                type={isVisible ? "text" : "password"}
+                                id='password'
+                                placeholder='Create a password'
+                            />
+                        </div>
+                    </div>
+                    <div className='w-full flex flex-col gap-2 mt-2'>
+                        <div className='w-full flex flex-col '>
+                            <Button
+                                variant='solid'
+                                color='primary'
+                            >
+                                Create Account
+                            </Button>
+                        </div>
+                        <div className='w-full flex flex-col '>
+                            <Button
+                                variant='solid'
+                            >
+                                Sign Up with Google
+                            </Button>
+                        </div>
+                    </div>
+
+                </Card>
+                <Card className='h-full flex flex-col w-full lg:max-w-[30vw] items-center justify-center p-3 py-5 gap-4'>
+                    <div className='w-full flex flex-col items-center justify-center gap-2 mb-2'>
+                        <SiSimplenote className='text-xl font-semibold' />
+                        <h1 className='text-xl font-semibold'>PlenoTube</h1>
+                        <h2 className='text-md font-medium flex gap-2 items-center'> <FaUserCircle /> Create Your Account</h2>
+                    </div>
+                    <div className='flex flex-col w-full gap-4'>
+                        <div className='w-full flex flex-col items-center'>
+                            <label htmlFor='full-name' className='mb-1 font-medium ml-1'>OTP <span className='text-danger'>*</span></label>
+                            <div className="flex w-full flex-wrap md:flex-nowrap gap-4 items-center justify-center">
+                                <InputOtp variant='faded' isInvalid={false} errorMessage="Invalid OTP code" length={6} />
+                            </div>
+                        </div>
+                        <div className='w-full flex flex-col '>
+                            <Button
+                                variant='solid'
+                                color='primary'
+                            >
+                                Confirm OTP
+                            </Button>
+                        </div>
+                    </div>
+                </Card>
+            </div>
+        </DefaultLayout>
+    )
+}
+
+export default SignUp

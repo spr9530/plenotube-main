@@ -1,0 +1,213 @@
+import React, { useState } from 'react'
+import DefaultLayout from '../../layouts/default'
+import { Card } from '@heroui/card'
+import { Input } from '@heroui/input'
+import { FaRegEye } from "react-icons/fa6";
+import { FaRegEyeSlash } from "react-icons/fa6";
+import { Button } from '@heroui/button'
+import { SiSimplenote } from "react-icons/si";
+import { FaUserCircle } from "react-icons/fa";
+import { InputOtp } from "@heroui/input-otp"
+import { useAuth } from '../../context/AuthContext';
+import { useEffect } from 'react';
+import { useForm } from 'react-hook-form'
+
+function SignUp() {
+    const [isVisible, setIsVisible] = useState(false);
+
+    const toggleVisibility = () => setIsVisible(!isVisible);
+    const {
+        register,
+        handleSubmit,
+        watch,
+        formState: { errors },
+    } = useForm()
+
+
+    const { handleRegister, handleOtp, isOtp, user, loading: authLoading } = useAuth();
+
+    const submitDetails = (data) => handleRegister(data);
+    const submitOtp = (data) => handleOtp({ ...data, email: user?.email })
+
+    return (
+        <DefaultLayout>
+            <div className='h-full w-full flex items-center justify-center p-2'>
+                {
+                    isOtp ?
+                        <form onSubmit={handleSubmit(submitOtp)} classname='w-full h-full'>
+                            <Card className='h-full flex flex-col w-full lg:max-w-[30vw] items-center justify-center p-3 py-5 gap-4'>
+                                <div className='w-full flex flex-col items-center justify-center gap-2 mb-2'>
+                                    <SiSimplenote className='text-xl font-semibold' />
+                                    <h1 className='text-xl font-semibold'>PlenoTube</h1>
+                                    <h2 className='text-md font-medium flex gap-2 items-center'> <FaUserCircle /> Create Your Account</h2>
+                                </div>
+                                <div className='flex flex-col w-full gap-4'>
+                                    <div className='w-full flex flex-col items-center'>
+                                        <label htmlFor='full-name' className='mb-1 font-medium ml-1'>OTP <span className='text-danger'>*</span></label>
+                                        <div className="flex w-full flex-wrap md:flex-nowrap gap-4 items-center justify-center">
+                                            <InputOtp name='otp' variant='faded' isInvalid={false} errorMessage="Invalid OTP code" length={6}
+                                                {...register('otp', { pattern: /^[0-9]^/, required: true })}
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className='w-full flex flex-col '>
+                                        <Button
+                                            variant='solid'
+                                            color='primary'
+                                            type='submit'
+                                            disabled={authLoading}
+                                        >
+                                            Confirm OTP
+                                        </Button>
+                                    </div>
+                                </div>
+                            </Card>
+                        </form>
+                        :
+                        <Card className='h-full flex flex-col w-full lg:max-w-[30vw] items-center justify-between p-3 py-5 gap-4'>
+                            <div className='w-full flex flex-col items-center justify-center gap-2 mb-2'>
+                                <SiSimplenote className='text-xl font-semibold' />
+                                <h1 className='text-xl font-semibold'>PlenoTube</h1>
+                                <h2 className='text-md font-medium flex gap-2 items-center'> <FaUserCircle /> Create Your Account</h2>
+                            </div>
+                            <form onSubmit={handleSubmit(submitDetails)} className='w-full'>
+                                <div className='flex flex-col w-full gap-4'>
+                                    {/* FULL NAME */}
+                                    <div className='w-full flex flex-col '>
+                                        <label htmlFor='full-name' className='mb-1 font-medium ml-1 w-full'>
+                                            Full Name <span className='text-danger flex gap-3'>* <span>{errors.full_name && (
+                                                <span className='text-danger text-sm ml-1'>{errors.full_name.message}</span>
+                                            )}</span></span>
+                                        </label>
+                                        <Input
+                                            id='full_name'
+                                            type='text'
+                                            placeholder='Enter your full name'
+                                            name='full_name'
+                                            {...register('full_name', {
+                                                required: 'Full name is required',
+                                                pattern: {
+                                                    value: /^[A-Za-z]+(?:\s[A-Za-z]+)*$/,
+                                                    message: 'Full name can only contain letters and spaces',
+                                                },
+                                            })}
+                                        />
+
+                                    </div>
+
+                                    {/* USERNAME */}
+                                    <div className='w-full flex flex-col '>
+                                        <label htmlFor='username' className='mb-1 font-medium ml-1'>
+                                            Username <span className='text-danger'>*</span>
+                                        </label>
+                                        <Input
+                                            id='username'
+                                            type='text'
+                                            name='username'
+                                            {...register('username', {
+                                                required: 'Username is required',
+                                                minLength: { value: 3, message: 'Username must be at least 3 characters long' },
+                                                maxLength: { value: 20, message: 'Username must be less than 20 characters' },
+                                                pattern: {
+                                                    value: /^[a-zA-Z0-9_]+$/,
+                                                    message: 'Username can only contain letters, numbers, and underscores',
+                                                },
+                                            })}
+                                            placeholder='Choose a username'
+                                        />
+                                        {errors.username && (
+                                            <span className='text-danger text-sm ml-1'>{errors.username.message}</span>
+                                        )}
+                                    </div>
+
+                                    {/* EMAIL */}
+                                    <div className='w-full flex flex-col '>
+                                        <label htmlFor='email' className='mb-1 font-medium ml-1'>
+                                            Email <span className='text-danger'>*</span>
+                                        </label>
+                                        <Input
+                                            id='email'
+                                            type='email'
+                                            name='email'
+                                            {...register('email', {
+                                                required: 'Email is required',
+                                                pattern: {
+                                                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                                                    message: 'Enter a valid email address',
+                                                },
+                                            })}
+                                            placeholder='sample@gmail.com'
+                                        />
+                                        {errors.email && (
+                                            <span className='text-danger text-sm ml-1'>{errors.email.message}</span>
+                                        )}
+                                    </div>
+
+                                    {/* PASSWORD */}
+                                    <div className='w-full flex flex-col '>
+                                        <label htmlFor='password' className='mb-1 font-medium ml-1'>
+                                            Password <span className='text-danger'>*</span>
+                                        </label>
+                                        <Input
+                                            endContent={
+                                                <button
+                                                    aria-label="toggle password visibility"
+                                                    className="focus:outline-solid outline-transparent cursor-pointer"
+                                                    type="button"
+                                                    onClick={toggleVisibility}
+                                                >
+                                                    {isVisible ? (
+                                                        <FaRegEye className="text-2xl text-default-400 pointer-events-none cursor-pointer" />
+                                                    ) : (
+                                                        <FaRegEyeSlash className="text-2xl text-default-400 pointer-events-none cursor-pointer" />
+                                                    )}
+                                                </button>
+                                            }
+                                            type={isVisible ? 'text' : 'password'}
+                                            id='password'
+                                            name='password'
+                                            {...register('password', {
+                                                required: 'Password is required',
+                                                pattern: {
+                                                    value: /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+                                                    message:
+                                                        'Password must be at least 8 characters long, contain one uppercase, one lowercase, one number, and one special character',
+                                                },
+                                            })}
+                                            placeholder='Create a password'
+                                        />
+                                        {errors.password && (
+                                            <span className='text-danger text-sm ml-1'>{errors.password.message}</span>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* BUTTONS */}
+                                <div className='w-full flex flex-col gap-2 mt-2'>
+                                    <div className='w-full flex flex-col '>
+                                        <Button
+                                            variant='solid'
+                                            color='primary'
+                                            type='submit'
+                                            disabled={authLoading}
+                                        >
+                                            Create Account
+                                        </Button>
+                                    </div>
+                                    <div className='w-full flex flex-col '>
+                                        <Button variant='solid'>
+                                            Sign Up with Google
+                                        </Button>
+                                    </div>
+                                </div>
+                            </form>
+
+
+                        </Card>
+                }
+            </div>
+        </DefaultLayout>
+    )
+}
+
+export default SignUp
