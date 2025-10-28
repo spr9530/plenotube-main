@@ -7,12 +7,20 @@ import SettingLayout from '../../layouts/settingLayout'
 import AccountModel from './accountModel.jsx/AccountModel';
 import { useState } from 'react';
 import { useUserContext } from '../../context/UserContext';
+import { useEffect } from 'react';
 
 
 const Platform_Icon = {
     Instagram: '/icons/instagram.png',
-    Youtube:'/icons/youtube.png',
-    Facebook:'/icons/facebook.png'
+    Youtube: '/icons/youtube.png',
+    Facebook: '/icons/facebook.png'
+}
+
+const BUTTON_COLOR ={
+    Pending:'warning',
+    Rejected:'danger',
+    Processing:'primary',
+    Failed:'warning'
 }
 
 function Accounts() {
@@ -25,9 +33,23 @@ function Accounts() {
     const [securityKey, setSecurityKey] = useState('');
     const [platform, setPlatform] = useState('');
     const [loading, setLoading] = useState(false);
+    const [connectedAcc, setConnectedAcc] = useState(false);
+    const [pendingAcc, setPendingAcc] = useState(false);
 
-    const handleGenerateKey = async (e, platform) => {
-        e.preventDefault();
+    useEffect(() => {
+        if (user?.linkedAccount?.length) {
+            user.linkedAccount.forEach(acc => {
+                if (acc.status === 'Verified') setConnectedAcc(true);;
+                if (acc.status !== 'Verified') setPendingAcc(true);
+            });
+
+        } else {
+            setConnectedAcc(false);
+            setPendingAcc(false);
+        }
+    }, [user]);
+
+    const handleGenerateKey = async (platform) => {
         setLoading(true);
         const key = await genrateAccountSecurityKey(platform);
         if (key) {
@@ -41,26 +63,51 @@ function Accounts() {
         <SettingLayout>
             <div className='flex flex-col gap-2'>
                 <div className='font-semibold'>Connected Accounts</div>
-                <div className='bg-dark1 border border-zinc-800 rounded-xl p-8 gap-2 flex justify-center align-items-center '>
-                    <span><IoMdInformationCircleOutline className='text-2xl' /></span>No Account Connected
-                </div>
-            </div>
-            <div className='flex flex-col gap-2'>
-                <div className='font-semibold'>Pending Accounts</div>
-                <div className='bg-dark1 border border-zinc-800 rounded-xl p-4 px-2 gap-2 flex justify-center align-items-center flex-col'>
+                <div className='bg-dark1 border border-zinc-800 rounded-xl p-3 gap-2 flex justify-center align-items-center '>
                     {
-                        user?.linkedAccount.map(acc => (
-                            <Link to={acc?.profileLink} className='bg-zinc-900 border border-zinc-800 w-full flex gap-1 justify-between align-items-center p-2 rounded-md'>
-                                <div className='flex gap-2 items-center w-full'>
-                                    <span className='max-w-[30px] overflow-hidden'><img className='object-contain' src={Platform_Icon[acc?.accountType]} alt="fb" /></span>
-                                    @{acc?.username}
-                                </div>
-                                <span className='text-lg cursor-pointer mb-2 text-danger'><MdDelete /></span>
-                            </Link>
+                        connectedAcc && user?.linkedAccount.map(acc => (
+                            <>
+                                {acc.status == 'Verified' &&
+                                    <Link to={acc?.profileLink} className='bg-zinc-900 border border-zinc-800 w-full flex gap-1 justify-between align-items-center p-2 rounded-md'>
+                                        <div className='flex gap-2 items-center w-full'>
+                                            <span className='max-w-[30px] overflow-hidden'><img className='object-contain' src={Platform_Icon[acc?.accountType]} alt="fb" /></span>
+                                            @{acc?.username}
+                                        </div>
+                                        <span className='text-lg cursor-pointer mb-2 text-danger'><MdDelete /></span>
+                                    </Link>
+                                }
+                            </>
+
                         ))
                     }
+                    {!connectedAcc && <><span><IoMdInformationCircleOutline className='text-2xl' /></span>No Account Connected</>}
                 </div>
             </div>
+            {
+                pendingAcc &&
+                <div className='flex flex-col gap-2'>
+                    <div className='font-semibold'>Pending Accounts</div>
+                    <div className='bg-dark1 border border-zinc-800 rounded-xl p-3 gap-2 flex justify-center items-center flex-col'>
+                        {
+                            user?.linkedAccount.map(acc => (
+                                <>
+                                    {acc.status != 'Verified' &&  acc.status != 'Pending' &&
+                                        <Link to={acc?.profileLink} className='bg-zinc-900 border border-zinc-800 w-full flex gap-1 justify-between items-center p-2 rounded-md'>
+                                            <div className='flex gap-2 items-center w-full'>
+                                                <span className='max-w-[30px] overflow-hidden'><img className='object-contain' src={Platform_Icon[acc?.accountType]} alt="fb" /></span>
+                                                @{acc?.username}
+                                            </div>
+                                            <span className='text-lg cursor-pointer mb-2 text-danger'><Button size='sm' className='min-w-[80px] font-semibold' variant="flat" color={`${BUTTON_COLOR[acc?.status]}`}>{acc?.status}</Button></span>
+                                            <span className='text-lg cursor-pointer mb-2 text-danger '><MdDelete /></span>
+                                        </Link>
+                                    }
+                                </>
+
+                            ))
+                        }
+                    </div>
+                </div>
+            }
 
 
             <div className='flex flex-col gap-2'>
@@ -68,11 +115,11 @@ function Accounts() {
                 <div className='grid grid-cols-12 gap-3'>
                     <div className='col-span-4'>
                         <Button size='lg' isLoading={loading && platform == 'Instagram'} className='bg-zinc-900 border border-zinc-800 w-full flex gap-1 justify-between align-items-center p-3'
-                            onClick={(e) => {
-                                handleGenerateKey(e, 'Instagram');
+                            onPress={() => {
+                                handleGenerateKey('Instagram');
                                 setPlatform('Instagram')
                                 setHeading('Add this security key in your Instagram bio')
-                                setDescription('After adding the security key, submit your profile link for verification');
+                                setDescription('Only after adding the security key, submit your profile link for verification. Otherwise profile will be rejected automatically');
                             }}
                         >
                             <div className='flex gap-2 items-center w-full'>
@@ -84,8 +131,8 @@ function Accounts() {
                     </div>
                     <div className='col-span-4'>
                         <Button size='lg' isLoading={loading && platform == 'YouTube'} className='bg-zinc-900 border border-zinc-800 w-full flex gap-1 justify-between align-items-center p-3'
-                            onClick={(e) => {
-                                handleGenerateKey(e, 'Youtube');
+                            onPress={() => {
+                                handleGenerateKey('Youtube');
                                 setPlatform('Youtube')
                                 setHeading('Add this security key in your YouTube profile')
                                 setDescription('After adding the security key, submit your profile link for verification');
@@ -100,8 +147,8 @@ function Accounts() {
                     </div>
                     <div className='col-span-4'>
                         <Button size='lg' isLoading={loading && platform == 'Facebook'} className='bg-zinc-900 border border-zinc-800 w-full flex gap-1 justify-between align-items-center p-3'
-                            onClick={(e) => {
-                                handleGenerateKey(e, 'Facebook');
+                            onPress={() => {
+                                handleGenerateKey('Facebook');
                                 setPlatform('Facebook')
                                 setHeading('Add this security key in your Facebook bio')
                                 setDescription('After adding the security key, submit your profile link for verification');

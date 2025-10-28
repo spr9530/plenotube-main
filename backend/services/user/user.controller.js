@@ -33,7 +33,7 @@ exports.getUserGeneral = async (req, res) => {
       return res.status(401).json({ message: 'User not authenticated', success: false });
     }
 
-    const userInfo = await User.findById(user.userid);
+    const userInfo = await User.findById(user.userid).populate('linkedAccount');
 
     if (!userInfo) {
       return res.status(404).json({ message: 'User not found', success: false });

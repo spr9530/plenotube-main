@@ -78,6 +78,16 @@ export const updatePasswordApi = async (data) => {
     }
 }
 
+export const getUserAccountsApi = async() => {
+    try{
+        const response = await axios.get(`${BASE_URL}/get-user-accounts`, {withCredentials:true});
+        return response.data;
+    }catch(error){
+        console.log(error);
+        throw error.response?.data || { success: false, message: "Server error" };
+    }
+}
+
 export const genrateSecurityKeyApi = async (platform) => {
     try {
         const response = await axios.get(`${BASE_URL}/genrate-account-security-code?platform=${platform}`, { withCredentials: true });

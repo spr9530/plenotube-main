@@ -87,6 +87,7 @@ const useUser = () => {
     }
   }, [user])
 
+
   const genrateAccountSecurityKey = useCallback(async(platform) =>{
     try{
       const response = await genrateSecurityKeyApi(platform);
@@ -100,8 +101,8 @@ const useUser = () => {
    const submitSocialProfile = useCallback(async(data,platform) =>{
     try{
       const response = await submitSocialProfileApi(data,platform);
-      generateToast({title:'Profile Submitted', message:response.message, type:'success'});
       setUser(response.user)
+      generateToast({title:'Profile Submitted', message:response.message, type:'success'});
       return true;
     }catch(error){
        generateToast({ title: 'Submission Error', message: error.message, type: 'danger' })
@@ -110,7 +111,7 @@ const useUser = () => {
   },[user])
 
   return { getUserGeneral, updateUserGeneral, genrateMailChangeOtp, verifyOtp, updateUserPassword,
-    genrateAccountSecurityKey,submitSocialProfile, user, loading };
+     genrateAccountSecurityKey,submitSocialProfile, user, loading };
 };
 
 export default useUser;

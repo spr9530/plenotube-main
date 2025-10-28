@@ -9,14 +9,7 @@ const userSchema = new mongoose.Schema({
   phone:{type: String, unique:true},
   isVerified:{type:Boolean, default:false, required:true},
   linkedAccount:[
-    {
-      username:{type:String},
-      accountType:{type:String, enum:['Instagram','Youtube', 'Facebook'], required:true},
-      verificationCode:{type:String},
-      status:{type:String, enum:['Pending','Verified','Processing','Not Verified','Rejected']},
-      profileLink:{type:String},
-      lastSecurityCodeTime: { type: Date }
-    }
+    {type: mongoose.Schema.Types.ObjectId, ref:'Account'}
   ],
   bio:{type: String},
   createdAt: { type: Date, default: Date.now },

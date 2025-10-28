@@ -3,6 +3,7 @@ const User = require("../user/user.schema");
 const crypto = require("crypto");
 const verificationQueue = require("./worker");
 const redisClient = require("../../config/redis.client");
+const Account = require("./accountSchema");
 
 
 exports.submitSocialProfile = async (req, res) => {
@@ -16,97 +17,137 @@ exports.submitSocialProfile = async (req, res) => {
     if (!verificationCode) return res.status(400).json({ success: false, message: 'Verification code required' });
     if (!accountType) return res.status(400).json({ success: false, message: 'Account type required' });
 
-    // ✅ Get user
-    const userData = await User.findById(user.userid);
+    const userData = await User.findById(user.userid).populate('linkedAccount');
+    console.log(userData)
+    if (!userData) return res.status(404).json({ success: false, message: 'User not found' });
 
-    if (!userData) {
-      return res.status(404).json({ success: false, message: 'User not found' });
+    // Find the pending account in the Account collection
+    const userAccounts = await Account.find({ _id: { $in: userData.linkedAccount } });
+
+    console.log(userAccounts)
+    // Check for duplicate link in user's accounts
+    const existingLink = userAccounts.find(acc => (
+      acc.accountType === accountType &&
+      acc.profileLink === profileLink
+    ))
+
+    if (existingLink && ['Processing', 'Verified'].includes(existingLink.status)) {
+      return res.status(400).json({
+        success: false,
+        message: `Profile link is already ${existingLink.status.toLowerCase()}`,
+      });
+    }
+    else if (existingLink && ['Rejected', 'Failed'].includes(existingLink.status)) {
+      console.log('Account existed', existingLink.status);
+
+      // Update the account
+      // need to improve that if user send its own verification code that s different from db 
+      await Account.findByIdAndUpdate(existingLink._id, {
+        status: 'Processing',
+        verificationCode
+      }, { new: true })
+
+      // Add verification job
+      await verificationQueue.add(`verify-profile:${user.userid}`, {
+        userId: user.userid,
+        profileUrl: profileLink,
+        platform: accountType,
+        code: verificationCode,
+        email: userData.email,
+        accountId: existingLink._id,
+      });
+
+      userData.linkedAccount.forEach((acc) => {
+        if (acc._id.toString() === existingLink._id.toString()) {
+          acc.status = 'Processing';
+          acc.verificationCode = verificationCode
+        }
+      });
+
+
+
+      console.log(userData.linkedAccount);
+
+      return res.status(200).json({
+        success: true,
+        message: `${accountType} profile submitted. Verification is again in progress.`,
+        verificationCode,
+        user: userData,
+      });
     }
 
-    // ✅ Check if pending account exists with correct verification code
-    const pendingAccount = userData.linkedAccount.find(
-      acc => acc.accountType === accountType && acc.status === 'Pending' && acc.verificationCode === verificationCode
-    );
+    let pendingAccount = userAccounts.find(
+      acc => (
+        acc.accountType === accountType &&
+        acc.status === 'Pending' &&
+        acc.verificationCode === verificationCode
+      ));
 
-    if (!pendingAccount) {
+    if (!pendingAccount)
       return res.status(400).json({ success: false, message: 'Invalid verification code or no pending account found' });
-    }
 
-    // ✅ Check if profile link is already Processing
-    const processingAccount = userData.linkedAccount.find(
-      acc => acc.accountType === accountType && acc.profileLink === profileLink && acc.status === 'Processing'
-    );
-
-    if (processingAccount) {
-      return res.status(400).json({ success: false, message: 'Profile is already under processing' });
-    }
-
-    // ✅ Check if profile link is already Verified
-    const verifiedAccount = userData.linkedAccount.find(
-      acc => acc.accountType === accountType && acc.profileLink === profileLink && acc.status === 'Verified'
-    );
-
-    if (verifiedAccount) {
-      return res.status(400).json({ success: false, message: 'Profile is already verified' });
-    }
-
+    // Extract username from link
     const getUsernameFromLink = (platform, link) => {
       try {
         switch (platform) {
           case 'Instagram':
-            // Example: https://www.instagram.com/username/
             return link.split('/').filter(Boolean).pop();
           case 'Facebook':
-            // Example: https://www.facebook.com/username/
             return link.split('/').filter(Boolean).pop();
-          case 'YouTube':
-            // Example: https://www.youtube.com/@username or /channel/abc
+          case 'YouTube': {
             const parts = link.split('/');
-            return parts.includes('@') ? parts.pop().replace('@', '') : parts.pop();
+            const handle = parts.find(p => p.startsWith('@'));
+            return handle ? handle.replace('@', '') : parts.pop();
+          }
           default:
             return '';
         }
-      } catch (err) {
-        console.error('Error extracting username:', err);
+      } catch {
         return '';
       }
     };
 
-    // ✅ Update the account status to 'Processing' and save profile link
-    const updatedUser = await User.findOneAndUpdate(
-      { _id: user.userid, 'linkedAccount.accountType': accountType, 'linkedAccount.status': 'Pending' },
-      {
-        $set: {
-          'linkedAccount.$.status': 'Processing',
-          'linkedAccount.$.profileLink': profileLink,
-          'linkedAccount.$.username': getUsernameFromLink(accountType, profileLink),
-        }
-      },
-      { new: true }
-    );
+    const username = getUsernameFromLink(accountType, profileLink);
+
+    // Update the account
+    await Account.findByIdAndUpdate(pendingAccount._id, {
+      status: 'Processing',
+      profileLink: profileLink,
+      username: username,
+    }, { new: true })
+    // Add verification job
+    await verificationQueue.add(`verify-profile:${user.userid}`, {
+      userId: user.userid,
+      profileUrl: profileLink,
+      platform: accountType,
+      code: pendingAccount.verificationCode,
+      email: userData.email,
+      accountId: pendingAccount._id,
+    });
+
+    userData.linkedAccount.forEach((acc) => {
+      if (acc._id.toString() === pendingAccount._id.toString()) {
+        acc.status = 'Processing';
+        acc.profileLink = profileLink;
+        acc.username = username;
+      }
+    });
 
 
-    // ✅ Add verification job to async queue
-    // await verificationQueue.add(`verify:${user.userid}`, {
-    //   userId: user.userid,
-    //   profileUrl: profileLink,
-    //   code: verificationCode,
-    //   accountType,
-    // });
+
+    console.log(userData.linkedAccount);
 
     return res.status(200).json({
       success: true,
       message: `${accountType} profile submitted. Verification in progress.`,
       verificationCode,
-      user: updatedUser,
+      user: userData,
     });
-
   } catch (error) {
     console.error('Error in submitSocialProfile:', error);
     return res.status(500).json({ success: false, message: 'Server error' });
   }
 };
-
 
 exports.generateAccountSecurityCode = async (req, res) => {
   try {
@@ -116,10 +157,12 @@ exports.generateAccountSecurityCode = async (req, res) => {
     if (!user) return res.status(401).json({ message: 'User not authorised', success: false });
     if (!accountType) return res.status(400).json({ message: 'Account type required', success: false });
 
-    const userData = await User.findById(user.userid);
+    const userData = await User.findById(user.userid).populate('linkedAccount');
     if (!userData) return res.status(404).json({ message: 'User not found', success: false });
 
-    let pendingAccount = userData.linkedAccount.find(acc => acc.accountType === accountType && acc.status === 'Pending');
+    let pendingAccount = userData.linkedAccount.find(
+      acc => acc.accountType === accountType && acc.status === 'Pending'
+    );
 
     // Cooldown: 2 minutes
     if (pendingAccount?.lastSecurityCodeTime && Date.now() - pendingAccount.lastSecurityCodeTime < 2 * 60 * 1000) {
@@ -134,35 +177,34 @@ exports.generateAccountSecurityCode = async (req, res) => {
       generatedSecurityKey += chars.charAt(Math.floor(Math.random() * chars.length));
     }
 
-    let updatedUser;
+    let updatedAccount;
+
     if (pendingAccount) {
       // Update existing pending account
-      updatedUser = await User.findOneAndUpdate(
-        { _id: user.userid, 'linkedAccount.accountType': accountType, 'linkedAccount.status': 'Pending' },
+      updatedAccount = await Account.findByIdAndUpdate(
+        pendingAccount._id,
         {
-          $set: {
-            'linkedAccount.$.verificationCode': generatedSecurityKey,
-            'linkedAccount.$.lastSecurityCodeTime': Date.now(),
-          },
+          verificationCode: generatedSecurityKey,
+          lastSecurityCodeTime: Date.now(),
         },
         { new: true }
       );
     } else {
-      // Add new pending account
-      updatedUser = await User.findByIdAndUpdate(
-        user.userid,
-        {
-          $push: {
-            linkedAccount: {
-              accountType,
-              verificationCode: generatedSecurityKey,
-              status: 'Pending',
-              lastSecurityCodeTime: Date.now(),
-            },
-          },
-        },
-        { new: true }
-      );
+      // Create new pending account
+      const newAccount = await Account.create({
+        user: user.userid,
+        accountType,
+        verificationCode: generatedSecurityKey,
+        status: 'Pending',
+        lastSecurityCodeTime: Date.now(),
+      });
+
+      // Link to user
+      await User.findByIdAndUpdate(user.userid, {
+        $push: { linkedAccount: newAccount._id }
+      });
+
+      updatedAccount = newAccount;
     }
 
     return res.status(201).json({

@@ -219,9 +219,9 @@ exports.createAccountViaGoogle = async (req, res) => {
         }
 
         // === 3️⃣ Check if user already exists ===
-        const existing = await User.findOne({ $or: [{ email }] });
-        const token = await createToken({ userid: existing._id, useremail: existing.email, username: existing.username });
+        const existing = await User.findOne({  email });
         if (existing && existing.isVerified) {
+            const token = await createToken({ userid: existing?._id, useremail: existing?.email, username: existing?.username });
             res.cookie('user', {
                 info: {
                     id: existing._id,
@@ -257,6 +257,8 @@ exports.createAccountViaGoogle = async (req, res) => {
             isVerified: true
         })
         await newUser.save();
+
+        const token = await createToken({ userid: newUser?._id, useremail: newUser?.email, username: newUser?.username });
 
         res.cookie('user', {
             info: {

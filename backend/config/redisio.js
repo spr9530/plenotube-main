@@ -3,16 +3,6 @@ const dotenv = require('dotenv');
 
 dotenv.config();
 
-console.log({
-    username: 'default',                // default for Redis Cloud
-    password: process.env.PASSWORD,     // store securely in env
-    socket: {
-        host: process.env.HOST,         // Redis host
-        port: process.env.REDIS_PORT    // Redis port
-    },
-    maxRetriesPerRequest: null,
-})
-
 const redisConnection = new IORedis({
   username: 'default',
   password: process.env.PASSWORD,   // better to keep in env
