@@ -17,6 +17,8 @@ import Danger from "@/pages/settings/danger"
 import CampaignInfo from "@/pages/campaignInfo/campaignInfo"
 import Submission from "@/pages/submission/submission"
 import ProtectedRoute from "./ProtectedRoute"
+import UserCampaign from "@/pages/userCampaign/userCampaign"
+
 import { useAuth } from "./context/AuthContext";
 import { useEffect, useState } from "react";
 
@@ -34,6 +36,7 @@ function App() {
       <Route element={<CampaignInfo />} path="/platform/discover/campaign/:name" />
       <Route element={<Submission />} path="/platform/discover/campaign/submission/:name" />
       <Route element={<MySubmission />} path="/platform/my-submission" />
+      <Route element={<ProtectedRoute element={<UserCampaign />}  redirect='platform/my-campaign'/>} path='/platform/my-campaign'/>
       <Route element={<ProtectedRoute element={<General />}  redirect='platform/profile/genral'/>} path="/platform/profile/general" />
       <Route element={<Orders />} path="/platform/profile/orders" />
       <Route element={<Accounts />} path="platform/profile/connected-accounts" />

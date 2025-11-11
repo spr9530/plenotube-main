@@ -2,7 +2,16 @@ import React, { useState } from 'react'
 import { Card, CardHeader, CardBody, CardFooter } from "@heroui/card";
 import { Avatar, AvatarGroup } from "@heroui/avatar"
 import { Chip } from '@heroui/chip';
-function InfoCard() {
+function InfoCard({
+    title = "Campaign Title",
+    platforms = ["Instagram", "Youtubr"],
+    reward = 500,
+    budget = 20000,
+    paid = 2000,
+    createdBy = 'Jhon deo',
+    description,
+    views = 100000
+}) {
     return (
         <Card className="max-w-[340px] border-1 border-zinc-700 bg-zinc-900">
             <CardHeader className="justify-between">
@@ -13,23 +22,27 @@ function InfoCard() {
                         src="https://heroui.com/avatars/avatar-1.png"
                     />
                     <div className="flex flex-col items-start justify-center">
-                        <h4 className="text-md font-semibold leading-none">Zoey Lang</h4>
+                        <h4 className="text-md font-semibold leading-none">{title}</h4>
                     </div>
                 </div>
                 <Chip size='sm' variat='solid' radius='sm' color='primary' >
                     <div className='px-3 py-1 flex gap-1 text-[12px] font-semibold'>
 
-                        <span>$12</span><span>/</span><span className='text-blue-300'>1k</span>
+                        <span>₹{reward}</span><span>/</span><span className='text-blue-300'>1k</span>
                     </div>
                 </Chip>
             </CardHeader>
             <CardBody className="px-3 py-0 text-small font-medium overflow-hidden">
-                <p>Frontend developer and UI/UX ......</p>
+                <p className="line-clamp-1">{description}</p>
                 <span className="pt-2 flex flex-col gap-1 text-[14px] font-semibold">
-                    $1292 Of $21321312 paid out
-                    <div className="h-2 bg-[orange] rounded-full w-full" role="img">
-                        
+                    ₹{paid} Of ₹{budget} paid out
+                    <div className={`h-2 bg-[#333332] rounded-full w-full`} role="img">
+                        <div className={`h-full bg-[orange] rounded-full `}
+                        style={{ width: `${(paid / budget) * 100}%` }}
+                        role="img">
+                        </div>
                     </div>
+
                 </span>
             </CardBody>
             <CardFooter className="flex justify-between gap-3">
@@ -39,16 +52,23 @@ function InfoCard() {
                 </div>
                 <div className="flex flex-col gap-1 justify-center ">
                     <p className="text-small text-zinc-500 font-semibold">Platform</p>
-                    <p className="font-semibold text-small flex gap-1 ">
-                        
-                            <Avatar radius='sm' className="w-5 h-5 text-tiny rounded-md" src="https://i.pravatar.cc/150?u=a042581f4e29026024d" />
-                            <Avatar radius='sm' className='w-5 h-5 text-tiny rounded-md' src="https://i.pravatar.cc/150?u=a04258114e29026302d" />
-                            <Avatar radius='sm' className='w-5 h-5 text-tiny rounded-md' src="https://i.pravatar.cc/150?u=a04258114e29026702d" />
-                        </p>
+                    <p className="font-semibold text-small flex justify-center gap-1 ">
+                        {
+                            platforms.includes("Facebook") &&
+                            <Avatar radius='sm' className="w-5 h-5 text-tiny rounded-md" src="/icons/facebook.png" />}
+                        {
+                            platforms.includes("Instagram") &&
+                            <Avatar radius='sm' className='w-5 h-5 text-tiny rounded-md' src="/icons/instagram.png" />
+                        }
+                        {
+                            platforms.includes("Youtube") &&
+                            <Avatar radius='sm' className='w-5 h-5 text-tiny rounded-md' src="/icons/youtube.png" />
+                        }
+                    </p>
                 </div>
                 <div className="flex flex-col gap-1 justify-center ">
                     <p className="text-small text-zinc-500 font-semibold">Views</p>
-                    <p className="font-semibold text-small">96,000,00</p>
+                    <p className="font-semibold text-small">{views}</p>
                 </div>
             </CardFooter>
         </Card>

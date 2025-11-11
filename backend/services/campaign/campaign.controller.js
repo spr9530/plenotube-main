@@ -1,42 +1,136 @@
 const redisClient = require("../../config/redis.client");
-const Campaign = require("./campaign.model.schema");
+const uploadImageToCloudinary = require("../utils/uploadToCloud");
+const Campaign = require("./campaign.model.schema.js")
+const sanitize = require('sanitize-html');
+const multer = require('multer');
 
-exports.createNewCampaign = async (req, res) => {
+// Use memory storage for temporary buffer
+const upload = multer({ storage: multer.memoryStorage() }).single('imageFile');
+
+exports.createNewCampaign = (req, res) => {
+  upload(req, res, async (err) => {
     try {
-        const user = req.user;
-        const data = req.validatedData;
-        if (!user) {
-            return res.status(401).json({ success: false, message: "Unauthorized" });
+      // 🧩 Handle file upload error
+      if (err) {
+        return res.status(400).json({ success: false, message: "File upload error" });
+      }
+
+      const user = req.user;
+      if (!user) {
+        return res.status(401).json({ success: false, message: "Unauthorized" });
+      }
+
+      const data = req.body;
+
+      // 🧹 Sanitize input fields
+      const safeTitle = sanitize(data.title);
+      const safeDescription = sanitize(data.description);
+      const safeCategory = sanitize(data.category);
+
+      // 🔢 Validate numeric fields
+      const budget = Number(data.budget);
+      const reward = Number(data.reward);
+      const minPayout = Number(data.minimumPayout);
+      const maxPayout = Number(data.maximumPayout);
+      const requiredView = Number(data.requiredView);
+
+      if ([budget, reward, requiredView].some((v) => isNaN(v))) {
+        return res.status(400).json({ success: false, message: "Invalid numeric values" });
+      }
+
+      // ✅ Business logic validations
+      if (budget < 5000) {
+        return res.status(400).json({
+          success: false,
+          message: "Budget cannot be less than 5000",
+        });
+      }
+
+      if (minPayout > budget / 3) {
+        console.log(minPayout, budget / 3)
+        return res.status(400).json({
+          success: false,
+          message: "Minimum Payout must be enough for atleast 3 user",
+        });
+      }
+
+      if (maxPayout < minPayout) {
+        return res.status(400).json({
+          success: false,
+          message: "Maximum Payout cannot be less than Minimum Payout",
+        });
+      }
+
+      // 🖼️ Image upload handling
+      let imageUrl = "";
+
+      if (req.file) {
+        const allowedTypes = ["image/jpeg", "image/png"];
+        if (!allowedTypes.includes(req.file.mimetype)) {
+          return res.status(400).json({
+            success: false,
+            message: "Only JPG/PNG images allowed",
+          });
         }
 
-        const duplicate = await Campaign.findOne({ tittle: data.title, createdBy: user._id });
-        if (duplicate) {
-            return res.status(409).json({ success: false, message: "Duplicate campaign title for same creator" });
+        const uploadResult = await uploadImageToCloudinary(req.file.buffer, "campaigns");
+        if (!uploadResult.success) {
+          return res.status(400).json({
+            success: false,
+            message: "Image upload failed",
+          });
         }
 
-        const newCampaign = new Campaign({
-            ...data,
-            createdBy: user._id,
+        imageUrl = uploadResult.url;
+      }
+
+      // 🧭 Prepare campaign data
+      const campaignData = {
+        title: safeTitle,
+        description: safeDescription,
+        category: safeCategory,
+        budget,
+        reward,
+        minPayout,
+        maxPayout,
+        requiredView,
+        requirements: JSON.parse(data.requirements || "[]"),
+        platforms: JSON.parse(data.platforms || "[]"),
+        imageUrl,
+        createdBy: user.userid,
+        type: "Clipping",
+      };
+
+      // 🛡️ Prevent duplicate campaigns
+      const duplicate = await Campaign.findOne({
+        title: campaignData.title,
+        createdBy: user._id,
+      });
+
+      if (duplicate) {
+        return res.status(409).json({
+          success: false,
+          message: "Duplicate campaign title for same creator",
         });
+      }
 
-        await newCampaign.save();
+      // 💾 Create new campaign
+      const newCampaign = await Campaign.create(campaignData);
 
-
-        // replaced with message queue if user base increases to 10k
-        queueMicrotask(async () => await cacheCampaign(newCampaign));
-
-
-        res.status(201).json({
-            success: true,
-            message: "Campaign created successfully",
-            campaign: newCampaign
-        });
-        return res.status(201).json({ success: true, message: "Campaign created successfully", campaign: newCampaign });
+      res.status(201).json({
+        success: true,
+        message: "Campaign created successfully",
+        campaign: newCampaign,
+      });
     } catch (error) {
-        console.log('Error while creating campign fn: CreateNewCampaign', error);
-        return res.status(500).json({ success: false, message: "Server error" });
+      console.error("Error while creating campaign:", error);
+      res.status(500).json({ success: false, message: "Server error" });
     }
-}
+  });
+};
+
+
+
 
 exports.getCampaigns = async (req, res) => {
   try {
@@ -91,6 +185,20 @@ exports.getCampaigns = async (req, res) => {
     return res.status(500).json({ success: false, message: 'Server error' });
   }
 };
+
+exports.getUserCampaigns = async(req, res) => {
+  try{
+    const user = req.user;
+    if(!user) return res.status(400).json({success:false, message:'Unauthorized'});
+
+    const campaigns = await Campaign.find({createdBy: user.userid}).sort({createdAt:-1});
+
+    return res.status(200).json({success:true, campaigns});
+  }catch(error){
+    console.log('Error in getUserCampaign:',error);
+    return res.status(500).json({success:false, message:'Server error'});
+  }
+}
 
 exports.getSingleCampaign = async (req, res) => {
   try {

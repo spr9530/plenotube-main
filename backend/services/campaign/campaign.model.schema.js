@@ -4,30 +4,27 @@ const campaignSchema = new mongoose.Schema({
     title: { type: String, required: true },
     description: { type: String, required: true },
     category: { type: String, required: true },
-    totalReward: { type: Number, required: true },
-    rewardPerK: { type: Number, required: true },
-    maxCampaignPayout: { type: Number, required: true },
-    minCampaignPayout: { type: Number, required: true },
+    budget: { type: Number, required: true },
+    reward: { type: Number, required: true },
+    maxPayout: { type: Number, required: true },
+    minPayout: { type: Number, required: true },
     imageUrl: { type: String, required: true },
+    paidOut:{type:Number, default:0, required:true},
     type: { type: String, enum: ['Clipping'], required: true },
     platforms: [
-        { type: String, enum: ['YouTube', 'Instagram', 'Facebook'], required: true }
+        { type: String, enum: ['Youtube', 'Instagram', 'Facebook'], required: true }
     ],
     createdAt: { type: Date, default: Date.now, required: true },
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     updatedAt: { type: Date, default: Date.now, required: true },
-    deadline: { type: Date},
     requirements: [
         { type: String, required: true }
     ],
-    rating: { type: Number, default: 0, required: true },
     requiredView:{ type: Number, default: 0, required: true },
     totalViews: { type: Number, default: 0, required: true },
-    reviews: [
-        { type: mongoose.Schema.Types.ObjectId, ref: 'Review' }
-    ],
-    status: { type: String, enum: ['Active', 'Paused', 'Completed'], default: 'Active', required: true },
+    status: { type: String, enum: ['Pending', 'Processing', 'Active', 'Paused', 'Completed'], default: 'Pending', required: true },
     tags: [{ type: String }],
+    reviews: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Review' }],
     applicants: [
         {
             user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },

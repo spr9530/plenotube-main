@@ -8,7 +8,7 @@ import { Chip } from '@heroui/chip'
 function Platform() {
     return (
         <MainLayout>
-            <section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
+            <section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10 h-full">
                 <div className="inline-block max-w-lg text-center justify-center">
                     <span className={title()}>Make&nbsp;</span>
                     <span className={title({class:"text-[#dd4819] font-bold"})}>Beautiful&nbsp;</span>
@@ -18,18 +18,6 @@ function Platform() {
                     </span>
                     <div className={subtitle({ class: "mt-4" })}>
                         PlenoTube is a public utility that helps you find what people have to offer on the internet
-                    </div>
-                </div>
-
-
-                <div className="mt-5 w-[90%] lg:w-[75%]">
-                    <Search />
-                </div>
-                <div className="mt-5">
-                    <div>
-                        <Button color="default" radius="full" variant="flat" className='bg-[#303032] text-white'>
-                            Search PlenoTube
-                        </Button>
                     </div>
                 </div>
                 <div className='mt-5 w-[40%] gap-2 flex justify-center items-center'>

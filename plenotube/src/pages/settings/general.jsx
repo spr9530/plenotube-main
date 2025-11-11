@@ -128,7 +128,7 @@ function General() {
                             />
                         </div>
                         <div className='flex flex-col justify-start'>
-                            <label htmlFor="email" className='text-sm mb-2 font-semibold'>Bio</label>
+                            <label htmlFor="bio" className='text-sm mb-2 font-semibold'>Bio</label>
                             <Textarea
                                 id="bio"
                                 labelPlacement='outside-top'

@@ -14,7 +14,7 @@ const navItems = [
     { name: 'Home', link: '/platform', active: <FaHome className='text-2xl' />, icon: <AiOutlineHome className='text-2xl' /> },
     { name: 'Discover', link: '/platform/discover', active: <RiCompassDiscoverFill className='text-2xl' />, icon: <RiCompassDiscoverLine className='text-2xl' /> },
     { name: 'My Submission', link: '/platform/my-submission', active: <PiMoneyFill className='text-2xl' />, icon: <PiMoneyLight className='text-2xl' /> },
-    { name: 'My Orders', link: '/platform/my-orders', active: <BsBorderStyle className='text-2xl' />, icon: <BsBorderStyle className='text-2xl' /> },
+    { name: 'My Campaign', link: '/platform/my-campaign', active: <BsBorderStyle className='text-2xl' />, icon: <BsBorderStyle className='text-2xl' /> },
     { name: 'Profile', link: '/platform/profile', active: <FaUser className='text-2xl' />, icon: <FaRegUser className='text-2xl' /> },
     { name: 'Notification', link: '/platform/notification', active: <MdNotificationsActive className='text-2xl' />, icon: <MdNotifications className='text-2xl' /> },
 ]

@@ -5,7 +5,8 @@ import { BrowserRouter } from "react-router-dom";
 import App from "./App.js";
 import { Provider } from "./provider.tsx";
 import { AuthProvider } from "./context/AuthContext"
-import {UserProvider} from "./context/UserContext"
+import { UserProvider } from "./context/UserContext"
+import {CampaignProvider} from "./context/CampaignContext"
 import "@/styles/globals.css";
 import { GoogleOAuthProvider } from '@react-oauth/google';
 
@@ -18,7 +19,9 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         <GoogleOAuthProvider clientId={CLIENT_ID}>
           <AuthProvider>
             <UserProvider>
-            <App />
+              <CampaignProvider>
+                <App />
+              </CampaignProvider>
             </UserProvider>
           </AuthProvider>
         </GoogleOAuthProvider>
