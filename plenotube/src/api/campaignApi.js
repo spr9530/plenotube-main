@@ -17,9 +17,28 @@ export const createCampaignApi = async (campaignData) => {
 
 export const getUserCampaignsApi = async () => {
     try {
-        const response = await axios.get(`${BASE_URL}/user/campaign/get-user-campaigns`, {withCredentials: true});
+        const response = await axios.get(`${BASE_URL}/user/campaign/get-user-campaigns`, { withCredentials: true });
         return response.data;
     } catch (error) {
-        throw error.response?.data || { success: false, message: "Server error" }
+        throw error.response?.data || { success: false,message:'Somthing Went Wrong' }
+    }
+}
+
+export const getDiscoverCampaignApi = async () => {
+    try {
+        const response = await axios.get(`${BASE_URL}/user/campaign/get-campaigns`, { withCredentials: true });
+
+        return response.data
+    } catch (error) {
+        throw error.response?.data || { success: false, message:'Somthing Went Wrong' }
+    }
+}
+
+export const getCampaignInfoApi = async(id) => {
+    try{
+        const response = await axios.get(`${BASE_URL}/user/campaign/get-campaign-info/${id}`, {withCredentials: true});
+        return response.data;
+    }catch(error){
+        throw error.response?.data || {success:false, message:'Somthing Went Wrong'}
     }
 }

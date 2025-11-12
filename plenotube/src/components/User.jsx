@@ -1,7 +1,7 @@
 import { Avatar } from '@heroui/avatar'
 import React from 'react'
 
-function UserProfile() {
+function UserProfile({user}) {
     return (
         <div className='flex gap-2'>
             <Avatar
@@ -11,7 +11,7 @@ function UserProfile() {
             />
             <div className='flex flex-col justify-center'>
                 <p className='font-semibold'>Sparsh Manhas</p>
-                <p className='text-zinc-600 dark:text-zinc-400 text-sm'>@sparhmanhas111</p>
+                <p className='text-zinc-600 dark:text-zinc-400 text-sm'>{user?.username || '@username'}</p>
             </div>
         </div>
     )

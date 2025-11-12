@@ -32,9 +32,10 @@ function App() {
       <Route element={<AboutPage />} path="/about" />
       <Route element={<ProtectedRoute element={<Platform />}  redirect='platform'/>} path='/platform'/>
       <Route element={<Profile />} path="/platform/profile" />
-      <Route element={<Discover />} path="/platform/discover" />
-      <Route element={<CampaignInfo />} path="/platform/discover/campaign/:name" />
-      <Route element={<Submission />} path="/platform/discover/campaign/submission/:name" />
+      <Route element={<ProtectedRoute element={<Discover />}  redirect='platform/discover'/>} path='/platform/discover'/>
+      {/* <Route element={<CampaignInfo />} path="/platform/discover/campaign/:name" /> */}
+      <Route element={<ProtectedRoute element={<CampaignInfo />}  redirect='platform/discover/campaign/:name'/>} path='/platform/discover/campaign/:name'/>
+      <Route element={<Submission />} path="/platform/discover/campaign/:name/submission" />
       <Route element={<MySubmission />} path="/platform/my-submission" />
       <Route element={<ProtectedRoute element={<UserCampaign />}  redirect='platform/my-campaign'/>} path='/platform/my-campaign'/>
       <Route element={<ProtectedRoute element={<General />}  redirect='platform/profile/genral'/>} path="/platform/profile/general" />

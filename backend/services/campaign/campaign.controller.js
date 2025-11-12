@@ -7,7 +7,7 @@ const multer = require('multer');
 // Use memory storage for temporary buffer
 const upload = multer({ storage: multer.memoryStorage() }).single('imageFile');
 
-exports.createNewCampaign = (req, res) => {
+exports.createNewCampaign = async (req, res) => {
   upload(req, res, async (err) => {
     try {
       // 🧩 Handle file upload error
@@ -134,9 +134,10 @@ exports.createNewCampaign = (req, res) => {
 
 exports.getCampaigns = async (req, res) => {
   try {
+    const user = req.user;
+    if (!user) return res.status(400).json({ message: 'Unauthorised', success: false });
     const {
       limit = 12,
-      search = '',
       platform,
       category,
       cursor,
@@ -149,7 +150,6 @@ exports.getCampaigns = async (req, res) => {
 
     // 1️⃣ Build dynamic query
     const query = {};
-    if (search) query.$text = { $search: search };
     if (platform) query.platforms = platform;
     if (category) query.category = category;
     if (cursor) {
@@ -158,25 +158,14 @@ exports.getCampaigns = async (req, res) => {
         : { $lt: cursor };  // descending
     }
 
-    // 2️⃣ Build Redis cache key
-    const cacheKey = `campaigns:${JSON.stringify({ limit: limitNum, search, platform, category, cursor, sortBy, order })}`;
-
-    const cached = await redisClient.get(cacheKey);
-    if (cached) {
-      console.log('Serving from cache');
-      return res.status(200).json({ success: true, campaigns: JSON.parse(cached) });
-    }
-
     // 3️⃣ Fetch campaigns from MongoDB
     const campaignsData = await Campaign.find(query)
+      .select('title description category budget reward minPayout maxPayout imageUrl type platforms createdBy')
       .sort({ [sortBy]: sortOrder })
       .limit(limitNum)
       .populate('createdBy', 'name email username');
 
-    // 4️⃣ Cache the result
-    if (campaignsData.length > 0) {
-      await redisClient.setEx(cacheKey, 3600, JSON.stringify(campaignsData));
-    }
+
 
     return res.status(200).json({ success: true, campaigns: campaignsData });
 
@@ -186,45 +175,37 @@ exports.getCampaigns = async (req, res) => {
   }
 };
 
-exports.getUserCampaigns = async(req, res) => {
-  try{
+exports.getUserCampaigns = async (req, res) => {
+  try {
     const user = req.user;
-    if(!user) return res.status(400).json({success:false, message:'Unauthorized'});
+    if (!user) return res.status(400).json({ success: false, message: 'Unauthorized' });
 
-    const campaigns = await Campaign.find({createdBy: user.userid}).sort({createdAt:-1});
+    const campaigns = await Campaign.find({ createdBy: user.userid }).sort({ createdAt: -1 })
+      .populate('createdBy', 'name email username');
 
-    return res.status(200).json({success:true, campaigns});
-  }catch(error){
-    console.log('Error in getUserCampaign:',error);
-    return res.status(500).json({success:false, message:'Server error'});
+    return res.status(200).json({ success: true, campaigns });
+  } catch (error) {
+    console.log('Error in getUserCampaign:', error);
+    return res.status(500).json({ success: false, message: 'Server error' });
   }
 }
 
-exports.getSingleCampaign = async (req, res) => {
+exports.getCamapaignInfo = async (req, res) => {
   try {
+    const user = req.user;
+    if (!user) return res.status(400).json({ message: 'Unauthorised', success: false });
     const { id } = req.params;
     if (!id) {
-      return res.status(400).json({ success: false, message: 'Campaign ID is required' });
-    }
-
-    // 1️⃣ Check cache first
-    const cachedCampaign = await redisClient.get(`campaign:${id}`);
-    if (cachedCampaign) {
-      return res.status(200).json({
-        success: true,
-        message: 'Campaign found (from cache)',
-        campaign: JSON.parse(cachedCampaign),
-      });
+      return res.status(400).json({ success: false, message: 'Invalid request' });
     }
 
     // 2️⃣ Fetch from DB
-    const campaign = await Campaign.findById(id).populate('createdBy', 'name email username');
+    const campaign = await Campaign.findById(id)
+    .select('-applicants -createdAt -updatedAt') 
+    .populate('createdBy', 'name email username');
     if (!campaign) {
       return res.status(404).json({ success: false, message: 'No campaign found' });
     }
-
-    // 3️⃣ Cache the result for 1 hour
-    await redisClient.setEx(`campaign:${id}`, 3600, JSON.stringify(campaign));
 
     return res.status(200).json({ success: true, message: 'Campaign found', campaign });
   } catch (error) {
