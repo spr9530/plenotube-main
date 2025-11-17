@@ -1,34 +1,47 @@
 const jwt = require("jsonwebtoken");
 
-exports.authenticate = async (req, res, next) => {
+exports.authenticate = (req, res, next) => {
   try {
     let token;
 
-    // 1️⃣ Check Authorization header first
+    // 1️⃣ Check Authorization header
     const authHeader = req.headers.authorization;
     if (authHeader && authHeader.startsWith("Bearer ")) {
       token = authHeader.split(" ")[1];
     }
 
-    // 2️⃣ If no header token, check cookie
-    else if (req.cookies?.user?.token) {
-      token = req.cookies.user.token;
+    // 2️⃣ Otherwise check cookie (correct way)
+    if (!token && req.cookies?.user) {
+      let parsedUser;
+      try {
+        parsedUser = JSON.parse(req.cookies.user);  // parse cookie
+      } catch (err) {
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid cookie format" });
+      }
+
+      token = parsedUser.token; // extract token properly
     }
 
-    // 3️⃣ If no token found anywhere
+    // 3️⃣ No token at all
     if (!token) {
-      return res.status(401).json({ message: "No token provided", success: false });
+      return res
+        .status(401)
+        .json({ success: false, message: "No token provided" });
     }
 
     // 4️⃣ Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // 5️⃣ Attach user info from token to request
+    // 5️⃣ Attach user info
     req.user = decoded;
 
     next();
   } catch (error) {
-    console.error("Error in authenticate middleware:", error);
-    return res.status(403).json({ message: "Invalid or expired token", success: false });
+    console.error("❌ Error in authenticate middleware:", error);
+    return res
+      .status(403)
+      .json({ success: false, message: "Invalid or expired token" });
   }
 };
