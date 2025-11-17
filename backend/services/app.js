@@ -14,15 +14,20 @@ dotenv.config();
 const app = express();
 
 connectDB();
-cloudinary.connectCloudinary()
+cloudinary.connectCloudinary();
 
-//Middleware
+// CORS — FIXED
 app.use(cors({
-  origin: ['https://plenotube.netlify.app', 'http://localhost:5173'], // allowed origins
-  credentials: true // allow cookies/auth headers
+    origin: ['https://plenotube.netlify.app', 'http://localhost:5173'],
+    credentials: true,
+    allowedHeaders: ["Content-Type", "Authorization"],
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"]
 }));
+
+// COOP FIX — must ALLOW popups
 app.use((req, res, next) => {
-    res.removeHeader("Cross-Origin-Opener-Policy");
+    res.setHeader("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
+    res.setHeader("Cross-Origin-Embedder-Policy", "unsafe-none");
     next();
 });
 
@@ -33,10 +38,6 @@ app.use(express.urlencoded({ extended: true }));
 // Routes
 app.use('/api/v1/auth', auth_router);
 app.use('/api/v1/user', user_router, account_router);
-app.use('/api/v1/user/campaign', campaign_router)
-
-
+app.use('/api/v1/user/campaign', campaign_router);
 
 module.exports = app;
-
-

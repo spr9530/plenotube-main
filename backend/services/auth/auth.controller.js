@@ -202,7 +202,9 @@ exports.verifySignUpOtp = async (req, res) => {
             {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === "production",
-                sameSite: "None",
+                sameSite: "none",
+                path: "/",
+
             }
         );
 
@@ -240,7 +242,9 @@ exports.createAccountViaGoogle = async (req, res) => {
                 {
                     httpOnly: true,
                     secure: process.env.NODE_ENV === "production",
-                    sameSite: "None",
+                    sameSite: "none",
+                    path: "/",
+
                 }
             );
 
@@ -283,7 +287,9 @@ exports.createAccountViaGoogle = async (req, res) => {
             {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === "production",
-                sameSite: "None",
+                sameSite: "none",
+                path: "/",
+
             }
         );
 
@@ -346,7 +352,9 @@ exports.loginUserAccount = async (req, res) => {
             {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === "production",
-                sameSite: "None",
+                sameSite: "none",
+                path: "/",
+
             }
         );
 
