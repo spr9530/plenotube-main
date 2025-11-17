@@ -5,17 +5,36 @@ const { authenticate } = require('../../middelware/authorization');
 const auth_router = express.Router();
 
 auth_router.get('/get-me', (req, res) => {
-    const { user } = req.cookies;
-    console.log(user)
-    if (!user) return res.status(401).json({ message: "Unauthorized" });
+    const rawUser = req.cookies.user;
+
+    if (!rawUser) {
+        return res.status(401).json({ authenticated: false, message: "Unauthorized" });
+    }
+
+    let user;
+    try {
+        user = JSON.parse(rawUser);   // << Important
+    } catch (err) {
+        return res.status(400).json({ authenticated: false, message: "Invalid cookie format" });
+    }
 
     try {
         const decoded = jwt.verify(user.token, process.env.JWT_SECRET);
-        res.json({ authenticated: true, user: user.info, token:user.token });
+
+        return res.json({
+            authenticated: true,
+            user: user.info,
+            token: user.token
+        });
+
     } catch (err) {
-        res.status(401).json({ authenticated: false, message: "Unauthorized" });
+        return res.status(401).json({
+            authenticated: false,
+            message: "Unauthorized"
+        });
     }
-})
+});
+
 auth_router.post('/sign-up', createNewAccount);
 auth_router.post('/sign-up-google', createAccountViaGoogle)
 auth_router.post('/verify-otp', verifySignUpOtp);
