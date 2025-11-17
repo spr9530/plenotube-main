@@ -24,7 +24,7 @@ function Discover() {
     const firstFilterRun = useRef(true);
     
     useEffect(() => {
-        if (!userInfo || loading || firstCallDone) return;
+        if (!userInfo || loading || firstCallDone.current) return;
         getDiscover(1);      // No filters for first load
         firstCallDone.current = true;
     }, [userInfo, loading]);
