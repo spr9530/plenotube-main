@@ -27,7 +27,7 @@ function Discover() {
         if (!userInfo || firstCallDone.current) return;
         getDiscover(1);      // No filters for first load
         firstCallDone.current = true;
-    }, [userInfo, loading]);
+    }, [userInfo]);
 
 
     useEffect(() => {
