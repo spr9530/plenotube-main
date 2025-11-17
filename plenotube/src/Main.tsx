@@ -3,7 +3,7 @@ import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 
 import App from "./App.js";
-import { Provider } from "./provider.tsx";
+import { Provider } from "./provider";
 import { AuthProvider } from "./context/AuthContext"
 import { UserProvider } from "./context/UserContext"
 import {CampaignProvider} from "./context/CampaignContext"
