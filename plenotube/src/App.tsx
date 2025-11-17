@@ -12,14 +12,13 @@ import General from "@/pages/settings/general"
 import Orders from "@/pages/settings/orders"
 import Accounts from "@/pages/settings/accounts"
 import Payment from "@/pages/settings/payment"
-import Balance from "@/pages/settings/Balance"
+// import Balance from "@/pages/settings/Balance"
 import Danger from "@/pages/settings/danger"
 import CampaignInfo from "@/pages/campaignInfo/campaignInfo"
 import Submission from "@/pages/submission/submission"
 import ProtectedRoute from "./ProtectedRoute"
 import UserCampaign from "@/pages/userCampaign/userCampaign"
 
-import { useAuth } from "./context/AuthContext";
 import { useEffect, useState } from "react";
 import { useTheme } from "@heroui/use-theme";
 
@@ -47,7 +46,7 @@ function App() {
       <Route element={<Orders />} path="/platform/profile/orders" />
       <Route element={<Accounts />} path="platform/profile/connected-accounts" />
       <Route element={<Payment />} path="platform/profile/payment-methods" />
-      <Route element={<Balance />} path="platform/profile/balance" />
+      {/* <Route element={<Balance />} path="platform/profile/balance" /> */}
       <Route element={<Danger />} path="platform/profile/danger-zone" />
     </Routes>
   )
