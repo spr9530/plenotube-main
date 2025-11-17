@@ -189,22 +189,22 @@ exports.verifySignUpOtp = async (req, res) => {
         await OTP.deleteOne({ email });
         const token = await createToken({ userid: user._id, useremail: user.email, username: user.username });
         res.cookie(
-  "user",
-  JSON.stringify({
-    info: {
-      id: newUser._id,
-      full_name: newUser.full_name,
-      email: newUser.email,
-      username: newUser.username,
-    },
-    token,
-  }),
-  {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "None",
-  }
-);
+            "user",
+            JSON.stringify({
+                info: {
+                    id: user._id,
+                    full_name: user.full_name,
+                    email: user.email,
+                    username: user.username,
+                },
+                token,
+            }),
+            {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === "production",
+                sameSite: "None",
+            }
+        );
 
         return res.json({ success: true, message: "OTP verified successfully (via DB fallback)", token, user });
 
@@ -230,10 +230,10 @@ exports.createAccountViaGoogle = async (req, res) => {
                 "user",
                 JSON.stringify({
                     info: {
-                        id: newUser._id,
-                        full_name: newUser.full_name,
-                        email: newUser.email,
-                        username: newUser.username,
+                        id: existing._id,
+                        full_name: existing.full_name,
+                        email: existing.email,
+                        username: existing.username,
                     },
                     token,
                 }),
@@ -333,22 +333,22 @@ exports.loginUserAccount = async (req, res) => {
 
         // 🍪 Set HTTP-only cookie
         res.cookie(
-  "user",
-  JSON.stringify({
-    info: {
-      id: newUser._id,
-      full_name: newUser.full_name,
-      email: newUser.email,
-      username: newUser.username,
-    },
-    token,
-  }),
-  {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "None",
-  }
-);
+            "user",
+            JSON.stringify({
+                info: {
+                    id: user._id,
+                    full_name: user.full_name,
+                    email: user.email,
+                    username: user.username,
+                },
+                token,
+            }),
+            {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === "production",
+                sameSite: "None",
+            }
+        );
 
 
         // ✅ Send success response
