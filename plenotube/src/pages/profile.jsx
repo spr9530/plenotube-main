@@ -17,9 +17,9 @@ function Profile() {
   const { getUserGeneral, user, loading: userLoading } = useUserContext();
   const { userInfo, token, loading: authLoading } = useAuth();
 
- useEffect(() => {
-        if (!user && token) getUserGeneral(token);
-    }, [user, token, getUserGeneral]);
+  useEffect(() => {
+    if (!user && token) getUserGeneral(token);
+  }, [user, token, getUserGeneral]);
 
   return (
     <SettingLayout>
@@ -33,17 +33,8 @@ function Profile() {
               src="https://heroui.com/images/hero-card.jpeg"
               width={200}
             />
-            <CardFooter className="justify-between before:bg-white/10 border-white/20 border-1 overflow-hidden py-1 absolute before:rounded-xl rounded-large bottom-1 w-[calc(100%_-_8px)] shadow-small ml-1 z-10">
-              <p className="text-tiny text-white/80">{user?.full_name || 'Loading...'}</p>
-              <Button
-                className="text-tiny text-white bg-black/20"
-                color="primary"
-                radius="lg"
-                size="sm"
-                variant="flat"
-              >
-                Follow
-              </Button>
+            <CardFooter className="justify-center before:bg-white/10 border-white/20 border-1 overflow-hidden py-1 absolute before:rounded-xl rounded-large bottom-1 w-[calc(100%_-_8px)] shadow-small ml-1 z-10">
+              <p className="text-tiny text-white/80 text-center">{user?.full_name || 'Loading...'}</p>
             </CardFooter>
           </Card>
         </div>
@@ -52,7 +43,7 @@ function Profile() {
             <div className='flex gap-2 items-center font-semibold'>
               <span className='text-lg'> {user?.username || 'Loading...'} </span>
               <div>
-                <Button variant='flat' color='primary'>12k followers</Button>
+                <Button variant='flat' color='primary'>120k View</Button>
               </div>
             </div>
             <div className='flex gap-3 '>
@@ -65,7 +56,7 @@ function Profile() {
           </div>
 
         </div>
-        <div className="flex w-full justify-center ">
+        {/* <div className="flex w-full justify-center ">
           <div className="flex w-full flex-col">
             <Tabs aria-label="Options" variant='solid' color='primary' selectedKey={selected} onSelectionChange={setSelected} className='relative'>
               <Tab key="my-campaign" title="My Campaign">
@@ -86,17 +77,17 @@ function Profile() {
                   </CardBody>
                 </Card>
               </Tab>
-              {/* <Tab key="videos" title="Videos">
+              <Tab key="videos" title="Videos">
                 <Card>
                   <CardBody>
                     Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt
                     mollit anim id est laborum.
                   </CardBody>
                 </Card>
-              </Tab> */}
+              </Tab>
             </Tabs>
           </div>
-        </div>
+        </div> */}
       </div>
     </SettingLayout>
   )

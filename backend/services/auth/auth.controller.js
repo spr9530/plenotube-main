@@ -400,3 +400,37 @@ exports.changeUserPassword = async (req, res) => {
     }
 };
 
+exports.logoutUser = async (req, res) => {
+    try {
+        const user = req.user;  // coming from auth middleware
+
+        if (!user) {
+            return res.status(404).json({
+                message: "User not found",
+                success: false
+            });
+        }
+
+        // 1️⃣ Clear the cookie (same name you used for authentication)
+        res.clearCookie("user", {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict"
+        });
+
+        // 2️⃣ Return success response
+        return res.status(200).json({
+            message: "Logged out successfully",
+            success: true
+        });
+
+    } catch (error) {
+        console.error("Logout error:", error);
+        return res.status(500).json({
+            message: "Failed to logout",
+            success: false
+        });
+    }
+};
+
+

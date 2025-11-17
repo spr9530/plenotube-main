@@ -16,7 +16,6 @@ import { useEffect } from 'react'
 
 function Submission() {
     const [modal, setModal] = useState(false)
-    const [campaign, setCampaign] = useState(null);
     const { getCampaignInfo,particularCampaign, loading } = useCampaignContext();
     const { userInfo } = useAuth()
     const location = useLocation();
@@ -138,14 +137,14 @@ function Submission() {
                                     <span className='text-zinc-600 text-md font-bold text-sm'>PLATFORM</span>
                                     <p className="font-semibold text-small flex gap-2 ">
                                         {
-                                            particularCampaign?.platforms.includes("Facebook") &&
+                                            particularCampaign?.platforms?.includes("Facebook") &&
                                             <Avatar radius='sm' className="w-6 h-6 text-tiny rounded-md" src="/icons/facebook.png" />}
                                         {
-                                            particularCampaign?.platforms.includes("Instagram") &&
+                                            particularCampaign?.platforms?.includes("Instagram") &&
                                             <Avatar radius='sm' className='w-6 h-6 text-tiny rounded-md' src="/icons/instagram.png" />
                                         }
                                         {
-                                            particularCampaign?.platforms.includes("Youtube") &&
+                                            particularCampaign?.platforms?.includes("Youtube") &&
                                             <Avatar radius='sm' className='w-6 h-6 text-tiny rounded-md' src="/icons/youtube.png" />
                                         }
                                     </p>

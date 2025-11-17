@@ -20,25 +20,32 @@ export const getUserCampaignsApi = async () => {
         const response = await axios.get(`${BASE_URL}/user/campaign/get-user-campaigns`, { withCredentials: true });
         return response.data;
     } catch (error) {
-        throw error.response?.data || { success: false,message:'Somthing Went Wrong' }
+        throw error.response?.data || { success: false, message: 'Somthing Went Wrong' }
     }
 }
 
-export const getDiscoverCampaignApi = async () => {
+export const getDiscoverCampaignApi = async (page = 1, platform='', category='') => {
     try {
-        const response = await axios.get(`${BASE_URL}/user/campaign/get-campaigns`, { withCredentials: true });
+        const response = await axios.get(
+            `${BASE_URL}/user/campaign/get-campaigns?page=${page}&platform=${platform}&category=${category}`,
+            { withCredentials: true }
+        );
 
-        return response.data
-    } catch (error) {
-        throw error.response?.data || { success: false, message:'Somthing Went Wrong' }
-    }
-}
-
-export const getCampaignInfoApi = async(id) => {
-    try{
-        const response = await axios.get(`${BASE_URL}/user/campaign/get-campaign-info/${id}`, {withCredentials: true});
         return response.data;
-    }catch(error){
-        throw error.response?.data || {success:false, message:'Somthing Went Wrong'}
+    } catch (error) {
+        throw error.response?.data || {
+            success: false,
+            message: 'Something went wrong'
+        };
+    }
+};
+
+
+export const getCampaignInfoApi = async (id) => {
+    try {
+        const response = await axios.get(`${BASE_URL}/user/campaign/get-campaign-info/${id}`, { withCredentials: true });
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || { success: false, message: 'Somthing Went Wrong' }
     }
 }

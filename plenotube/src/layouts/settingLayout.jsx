@@ -25,7 +25,7 @@ const navItems = [
     { name: 'Connected Accounts', link: '/platform/profile/connected-accounts', active: <PiPlugsConnectedFill className='text-2xl' />, icon: <PiPlugsConnectedLight className='text-2xl' /> },
     { name: 'Payment Methods', link: '/platform/profile/payment-methods', active: <RiMoneyDollarBoxFill className='text-2xl' />, icon: <RiMoneyDollarBoxLine className='text-2xl' /> },
     { name: 'Balance', link: '/platform/profile/balance', active: <PiPiggyBankFill className='text-2xl' />, icon: <PiPiggyBank className='text-2xl' /> },
-    { name: 'Orders', link: '/platform/profile/orders', active: <FaRectangleList className='text-2xl' />, icon: <FaRegRectangleList className='text-2xl' /> },
+    // { name: 'Orders', link: '/platform/profile/orders', active: <FaRectangleList className='text-2xl' />, icon: <FaRegRectangleList className='text-2xl' /> },
     { name: 'Dager Zone', link: '/platform/profile/danger-zone', active: <CgDanger className='text-2xl' />, icon: <CgDanger className='text-2xl' /> },
 ]
 

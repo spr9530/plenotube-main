@@ -47,21 +47,23 @@ export const CampaignProvider = ({ children }) => {
         setLoading(false);
     }
 
-    const getDiscover = async (page=1) => {
-        if (discoverLoading || discoverEnd) return; // prevent multiple or unnecessary requests
+    const getDiscover = async (page = 1, platform, category) => {
+        if (discoverLoading || discoverEnd) return;
 
         try {
             setDiscoverLoading(true);
-            const res = await getDiscoverCampaignApi(page); // pass page param to backend
 
-            if (res.success && Array.isArray(res.campaigns)) {
-                if (res.campaigns.length === 0) {
-                    setDiscoverEnd(true); // no more data
-                } else {
-                    setDiscover((prev) => [...prev, ...res.campaigns]);
-                    setDiscoverPage(page);
-                }
+            const res = await getDiscoverCampaignApi(page, platform, category);
+
+            if (!res.success) throw new Error("API failed");
+
+            if (!Array.isArray(res.campaigns) || res.campaigns.length === 0) {
+                setDiscoverEnd(true);
+                return;
             }
+
+            setDiscover(prev => [...prev, ...res.campaigns]);
+            setDiscoverPage(page);
         } catch (error) {
             console.error(error);
             generateToast({
@@ -91,7 +93,7 @@ export const CampaignProvider = ({ children }) => {
 
 
 
-    return <CampaignContext.Provider value={{ loading, userCampaign, discover, discoverEnd, discoverLoading,particularCampaign, createCampaign, getUserCampaigns, getDiscover, getCampaignInfo }}>
+    return <CampaignContext.Provider value={{ loading, userCampaign, discover, discoverEnd, discoverLoading, particularCampaign, createCampaign, getUserCampaigns, getDiscover, setDiscoverEnd, setDiscover, getCampaignInfo }}>
         {children}
     </CampaignContext.Provider>
 }

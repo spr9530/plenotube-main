@@ -112,11 +112,11 @@ exports.sendEmailChangeOtp = async (req, res) => {
     const otp = genrateOtp();
     console.log("Generated OTP:", otp);
 
-    // Redis Key for rate limiting & quick verification
-    const emailKey = `mail_change_otp:${user.userid}`;
+    // // Redis Key for rate limiting & quick verification
+    // const emailKey = `mail_change_otp:${user.userid}`;
 
-    // Store OTP in Redis (overwrite if exists)
-    await redisClient.setEx(emailKey, 420, otp); // 7 minutes
+    // // Store OTP in Redis (overwrite if exists)
+    // await redisClient.setEx(emailKey, 420, otp); // 7 minutes
 
     // Also persist OTP in MongoDB (for logs or backup)
     const existingOtpDoc = await OTP.findOne({ email });
@@ -173,12 +173,12 @@ exports.verifyEmailChangeOtp = async (req, res) => {
       return res.status(401).json({ message: 'User not authenticated', success: false });
     }
 
-    const emailKey = `mail_change_otp:${user.userid}`;
-    console.log(emailKey);
-    const storedOtp = await redisClient.get(emailKey);
-    if (storedOtp && storedOtp !== otp) {
-      return res.status(400).json({ message: 'Invalid OTP', success: false });
-    }
+    // const emailKey = `mail_change_otp:${user.userid}`;
+    // console.log(emailKey);
+    // const storedOtp = await redisClient.get(emailKey);
+    // if (storedOtp && storedOtp !== otp) {
+    //   return res.status(400).json({ message: 'Invalid OTP', success: false });
+    // }
 
     const otpRecord = await OTP.findOne({ email: newemail }).sort({ createdAt: -1 });
     if (!otpRecord) {
@@ -206,7 +206,7 @@ exports.verifyEmailChangeOtp = async (req, res) => {
     }
 
     // 6️⃣ Clean up Redis and Mongo
-    await redisClient.del(emailKey);
+    // await redisClient.del(emailKey);
     await OTP.deleteMany({ userId: user.userid }); // remove used OTPs
 
     // 7️⃣ Respond success

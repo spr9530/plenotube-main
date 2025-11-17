@@ -18,13 +18,10 @@ exports.submitSocialProfile = async (req, res) => {
     if (!accountType) return res.status(400).json({ success: false, message: 'Account type required' });
 
     const userData = await User.findById(user.userid).populate('linkedAccount');
-    console.log(userData)
     if (!userData) return res.status(404).json({ success: false, message: 'User not found' });
 
     // Find the pending account in the Account collection
     const userAccounts = await Account.find({ _id: { $in: userData.linkedAccount } });
-
-    console.log(userAccounts)
     // Check for duplicate link in user's accounts
     const existingLink = userAccounts.find(acc => (
       acc.accountType === accountType &&
@@ -41,7 +38,6 @@ exports.submitSocialProfile = async (req, res) => {
       console.log('Account existed', existingLink.status);
 
       // Update the account
-      // need to improve that if user send its own verification code that s different from db 
       await Account.findByIdAndUpdate(existingLink._id, {
         status: 'Processing',
         verificationCode
@@ -63,10 +59,6 @@ exports.submitSocialProfile = async (req, res) => {
           acc.verificationCode = verificationCode
         }
       });
-
-
-
-      console.log(userData.linkedAccount);
 
       return res.status(200).json({
         success: true,

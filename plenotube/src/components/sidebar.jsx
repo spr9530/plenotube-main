@@ -1,6 +1,5 @@
 import React from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
-import { ThemeSwitch } from './theme-switch'
 import { FaHome, FaUser, FaRegUser } from 'react-icons/fa'
 import { RiCompassDiscoverFill, RiCompassDiscoverLine } from 'react-icons/ri'
 import { MdNotificationsActive, MdNotifications } from 'react-icons/md'
@@ -8,6 +7,8 @@ import { AiOutlineHome } from 'react-icons/ai'
 import { PiMoneyFill, PiMoneyLight } from 'react-icons/pi'
 import { BsBorderStyle } from "react-icons/bs";
 import '../assets/css/style.css';
+import { Button } from '@heroui/button'
+import { useAuth } from '../context/AuthContext'
 
 
 const navItems = [
@@ -16,11 +17,12 @@ const navItems = [
     { name: 'My Submission', link: '/platform/my-submission', active: <PiMoneyFill className='text-2xl' />, icon: <PiMoneyLight className='text-2xl' /> },
     { name: 'My Campaign', link: '/platform/my-campaign', active: <BsBorderStyle className='text-2xl' />, icon: <BsBorderStyle className='text-2xl' /> },
     { name: 'Profile', link: '/platform/profile', active: <FaUser className='text-2xl' />, icon: <FaRegUser className='text-2xl' /> },
-    { name: 'Notification', link: '/platform/notification', active: <MdNotificationsActive className='text-2xl' />, icon: <MdNotifications className='text-2xl' /> },
+    // { name: 'Notification', link: '/platform/notification', active: <MdNotificationsActive className='text-2xl' />, icon: <MdNotifications className='text-2xl' /> },
 ]
 
 function Sidebar() {
     const location = useLocation()
+    const {handleLogout, loading } = useAuth()
     return (
         <div className="flex-col h-full hidden lg:flex p-4 pl-0 relative">
             <div className="py-8"></div>
@@ -47,7 +49,7 @@ function Sidebar() {
             </div>
 
             <div className="absolute bottom-0 foreground1 p-3 w-full h-44">
-                <ThemeSwitch />
+                <Button isLoading={loading} onPress={handleLogout} color='danger' className='w-full' variant='flat'>LogOut</Button>
             </div>
         </div>
     )

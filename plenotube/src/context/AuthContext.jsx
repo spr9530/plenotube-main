@@ -9,6 +9,7 @@ import { useState } from "react";
 import { useEffect } from "react";
 import { useCallback } from "react";
 import axios from "axios";
+import generateToast from "../toast/GenrateToast";
 
 const AuthContext = createContext();
 
@@ -108,7 +109,7 @@ export const AuthProvider = ({ children }) => {
             const redirectPath = params.get("redirect") || "platform";
             try {
                 const response = await registerViaGoogleApi(credentials);
-                 if (!response.success) {
+                if (!response.success) {
                     // tbd toast 
                     console.log(response.message);
                     return;
@@ -146,19 +147,41 @@ export const AuthProvider = ({ children }) => {
                 setLoading(false);
                 navigate(`/${redirectPath}`);
             } catch (error) {
-                // dispatch({
-                //     type: "LOGIN_ERROR",
-                //     payload: error.response?.data?.message || error.message,
-                // });
                 console.error("Login error:", error);
+                generateToast({ title: 'Login Error', message: error, type: 'danger' })
             }
         }, [dispatch, navigate, location]
     );
 
-    const handleLogout = async () => {
-        await logoutUser();
-        dispatch({ type: "LOGOUT" });
-    };
+    const handleLogout = useCallback(async () => {
+        setLoading(true);
+
+        try {
+            // 1️⃣ Optional: call backend to clear cookies (if using withCredentials)
+            await axios.get("http://localhost:5000/api/v1/auth/logout", {
+                withCredentials: true,
+            });
+
+            // 2️⃣ Clear React state
+            setToken(null);
+            setUserInfo(null);
+            setIsAuthenticated(false);
+
+            // 3️⃣ Remove session storage auth object
+            sessionStorage.removeItem("auth");
+            // cook
+
+            // 4️⃣ Redirect user
+            navigate("/sign-in");
+
+        } catch (error) {
+            console.error("Logout error:", error);
+        } finally {
+            setLoading(false);
+        }
+    }, [navigate]);
+
+
 
     return (
         <AuthContext.Provider value={{ isOtp, isAuthenticated, userInfo, loading, token, dispatch, handleRegister, handleRegisterViaGoogle, handleLogout, handleOtp, handleLogin }}>

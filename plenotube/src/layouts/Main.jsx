@@ -1,6 +1,5 @@
 import { Link } from "@heroui/link";
 import Sidebar from "../components/sidebar";
-import { ThemeSwitch } from '../components/theme-switch'
 
 export default function MainLayout({
     children,
@@ -14,7 +13,6 @@ export default function MainLayout({
                         className={`hidden lg:col-span-2 lg:block relative`}
                     >
                         <Sidebar />
-
                         <div className="w-full flex items-center justify-center py-3 absolute bottom-0">
                             <Link
                                 isExternal
@@ -22,8 +20,8 @@ export default function MainLayout({
                                 href="https://heroui.com"
                                 title="heroui.com homepage"
                             >
-                                <span className="text-default-600">Powered by</span>
-                                <p className="text-primary">HeroUI</p>
+                                <span className="text-default-600">Developed by</span>
+                                <p className="text-primary">Innocrede Sol.</p>
                             </Link>
                         </div>
                     </div>

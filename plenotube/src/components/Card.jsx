@@ -9,6 +9,7 @@ function InfoCard({
     budget = 20000,
     paid = 2000,
     createdBy = 'Jhon deo',
+    category= 'Category',
     description,
     views = 100000
 }) {
@@ -22,7 +23,7 @@ function InfoCard({
                         src="https://heroui.com/avatars/avatar-1.png"
                     />
                     <div className="flex flex-col items-start justify-center">
-                        <h4 className="text-md font-semibold leading-none">{title}</h4>
+                        <h4 className="text-md font-semibold leading-none capitalize">{title}</h4>
                     </div>
                 </div>
                 <Chip size='sm' variat='solid' radius='sm' color='primary' >
@@ -47,8 +48,8 @@ function InfoCard({
             </CardBody>
             <CardFooter className="flex justify-between gap-3">
                 <div className="flex flex-col gap-1 justify-center  ">
-                    <p className=" text-small font-semibold text-zinc-500">Type</p>
-                    <p className="font-semibold text-small">Clipping</p>
+                    <p className=" text-small font-semibold text-zinc-500">Category</p>
+                    <p className="font-semibold text-small capitalize">{category}</p>
                 </div>
                 <div className="flex flex-col gap-1 justify-center ">
                     <p className="text-small text-zinc-500 font-semibold">Platform</p>

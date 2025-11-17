@@ -2,7 +2,10 @@ import { Avatar } from '@heroui/avatar'
 import React from 'react'
 import Rating from './Rating'
 
-function Reviews() {
+function Reviews({
+    comment,
+    rating
+}) {
     return (
         <div className='flex justify-between'>
             <div className='flex gap-2'>
@@ -17,9 +20,9 @@ function Reviews() {
                             13 days
                         </span>
                     </p>
-                    <Rating />
+                    <Rating rating={rating} />
                     <div>
-                        Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quod.
+                        {comment}
                     </div>
                 </div>
 

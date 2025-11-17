@@ -21,9 +21,14 @@ import UserCampaign from "@/pages/userCampaign/userCampaign"
 
 import { useAuth } from "./context/AuthContext";
 import { useEffect, useState } from "react";
+import { useTheme } from "@heroui/use-theme";
 
 
 function App() {
+  const { theme, setTheme } = useTheme();
+  useEffect(()=>{
+    setTheme("dark");
+  },[])
   return (
     <Routes>
       <Route element={<SignIn />} path="/sign-in" />

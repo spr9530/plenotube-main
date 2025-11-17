@@ -131,49 +131,86 @@ exports.createNewCampaign = async (req, res) => {
 
 
 
-
 exports.getCampaigns = async (req, res) => {
   try {
     const user = req.user;
-    if (!user) return res.status(400).json({ message: 'Unauthorised', success: false });
-    const {
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized",
+      });
+    }
+
+    // Query params
+    let {
       limit = 12,
       platform,
       category,
       cursor,
-      sortBy = 'createdAt',
-      order = 'desc'
+      sortBy = "createdAt",
+      order = "desc",
     } = req.query;
 
-    const limitNum = parseInt(limit);
-    const sortOrder = order === 'asc' ? 1 : -1;
+    const limitNum = Number(limit) || 12;
+    const sortOrder = order === "asc" ? 1 : -1;
 
-    // 1️⃣ Build dynamic query
+    const validSortFields = ["createdAt", "reward", "budget"];
+    if (!validSortFields.includes(sortBy)) sortBy = "createdAt";
+
     const query = {};
-    if (platform) query.platforms = platform;
-    if (category) query.category = category;
-    if (cursor) {
-      query[sortBy] = sortOrder === 1
-        ? { $gt: cursor }   // ascending
-        : { $lt: cursor };  // descending
+
+    if (platform) {
+      query.platforms = { $in: platform.split(",") };
     }
 
-    // 3️⃣ Fetch campaigns from MongoDB
-    const campaignsData = await Campaign.find(query)
-      .select('title description category budget reward minPayout maxPayout imageUrl type platforms createdBy')
+    if (category) {
+      query.category = { $in: category.split(",") };
+    }
+
+    // 🔹 Cursor-based pagination (only works with sorted field)
+    if (cursor) {
+      query[sortBy] = sortOrder === 1
+        ? { $gt: cursor }
+        : { $lt: cursor };
+    }
+
+    // 🔹 Fetch data
+    const campaigns = await Campaign.find(query)
+      .select(
+        "title description category budget reward minPayout maxPayout imageUrl type platforms createdBy createdAt"
+      )
       .sort({ [sortBy]: sortOrder })
       .limit(limitNum)
-      .populate('createdBy', 'name email username');
+      .populate("createdBy", "name email username");
 
+    // 🔹 If no more data
+    if (!campaigns.length || campaigns.length < limitNum) {
+    return res.status(200).json({
+        success: true,
+        campaigns,
+        hasMore: false,
+        nextCursor: null
+    });
+}
 
+    const lastCampaign = campaigns[campaigns.length - 1];
+    const nextCursor = lastCampaign[sortBy];
 
-    return res.status(200).json({ success: true, campaigns: campaignsData });
-
+    return res.status(200).json({
+      success: true,
+      campaigns,
+      nextCursor,
+      hasMore: true,
+    });
   } catch (error) {
-    console.log('Error fetching campaigns:', error);
-    return res.status(500).json({ success: false, message: 'Server error' });
+    console.error("Error fetching campaigns:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
   }
 };
+
 
 exports.getUserCampaigns = async (req, res) => {
   try {
@@ -201,8 +238,8 @@ exports.getCamapaignInfo = async (req, res) => {
 
     // 2️⃣ Fetch from DB
     const campaign = await Campaign.findById(id)
-    .select('-applicants -createdAt -updatedAt') 
-    .populate('createdBy', 'name email username');
+      .select('-applicants -createdAt -updatedAt')
+      .populate('createdBy', 'name email username');
     if (!campaign) {
       return res.status(404).json({ success: false, message: 'No campaign found' });
     }

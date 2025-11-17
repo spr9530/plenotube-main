@@ -10,34 +10,77 @@ import { useCampaignContext } from '../context/CampaignContext';
 import { useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
+import { useRef } from 'react';
+import { useState } from 'react';
 
 function Discover() {
 
-    const { discover, discoverEnd, discoverLoading, getDiscover } = useCampaignContext()
+    const { discover, discoverEnd, discoverLoading, getDiscover, setDiscover, setDiscoverEnd } = useCampaignContext()
     const { userInfo } = useAuth();
-
+    const [page, setPage] = useState(1);
+    const [platform, setPlatform] = useState('');
+    const [category, setCategory] = useState('');
+    const firstCallDone = useRef(false);
+    const firstFilterRun = useRef(true);
+    
     useEffect(() => {
-        if (userInfo && discover.length === 0) {
-            getDiscover(1);
-        }
+        if (!userInfo || firstCallDone) return;
+        getDiscover(1);      // No filters for first load
+        firstCallDone.current = true;
     }, [userInfo]);
 
-    // Infinite scroll logic
+
+    useEffect(() => {
+        if (firstFilterRun.current) {
+            firstFilterRun.current = false;
+            return;
+        }
+        setDiscover([]);
+        setDiscoverEnd(false);
+        setPage(1);
+
+        getDiscover(1, platform, category);
+
+    }, [platform, category]);
+
+    useEffect(() => {
+        if (page === 1) return;
+        getDiscover(page, platform, category);
+    }, [page]);
+
     useEffect(() => {
         const handleScroll = () => {
-            if (discoverLoading || discoverEnd) return;
+            if (discoverLoading || discoverEnd || !discover.hasMore) return;
 
             const scrolledToBottom =
-                window.innerHeight + window.scrollY >= document.body.offsetHeight - 200;
+                window.innerHeight + window.scrollY >=
+                document.body.offsetHeight - 200;
 
-            if (scrolledToBottom) {
-                getDiscover(prevPage => prevPage + 1);
-            }
+            if (scrolledToBottom) setPage(prev => prev + 1);
         };
 
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
-    }, [discoverLoading, discoverEnd]);
+
+    }, [discoverLoading, discoverEnd, discover.hasMore]);
+
+    const handlePlatform = e => setPlatform(e.target.value);
+    const handleCategory = e => setCategory(e.target.value);
+
+    const handleClearFilter = () => {
+        setPlatform('');
+        setCategory('');
+        setDiscover([]);
+        setDiscoverEnd(false);
+        setPage(1);
+
+        getDiscover(1, '', '');
+    };
+
+
+
+
+
 
     return (
         <MainLayout className='p-4 lg:p-16 lg:pt-8'>
@@ -56,28 +99,20 @@ function Discover() {
                     </div>
                     <div className='col-span-7 w-full text-zinc-800 dark:text-zinc-300'>
                         <div className='flex w-full gap-2 items-center mt-3'>
-                            <div className='grid grid-12 w-full gap-2'>
-                                <Select
-                                    className=" max-w-md col-span-4"
-                                    label="Type"
-                                    labelPlacement='outside-left'
-                                    placeholder="Type"
-                                    variant='flat'
-                                >
-                                    <SelectItem className='outline-none w-[100px]'>Clipping</SelectItem>
-                                    <SelectItem className='outline-none w-[100px]'>UGC</SelectItem>
-                                </Select>
-                            </div>
+                            {(platform || category) && <div className='flex gap-2 col-span-2'>
+                                <Button size='sm' variant='light' color='danger' className='font-semibold' onPress={(e) => handleClearFilter(e)}>Clear X</Button>
+                            </div>}
                             <div className='flex w-full gap-2 col-span'>
                                 <Select
                                     className="  max-w-md col-span-4"
                                     label="Platform"
                                     labelPlacement='outside-left'
                                     placeholder="Platform"
+                                    onChange={(e) => handlePlatform(e)}
                                 >
-                                    <SelectItem className='outline-none w-[100px]'>Instagram</SelectItem>
-                                    <SelectItem className='outline-none w-[100px]'>Youtube</SelectItem>
-                                    <SelectItem className='outline-none w-[100px]'>Facebook</SelectItem>
+                                    <SelectItem className='outline-none w-full' key='Instagram'>Instagram</SelectItem>
+                                    <SelectItem className='outline-none w-full' key='Youtube'>Youtube</SelectItem>
+                                    <SelectItem className='outline-none w-full' key='Facebook'>Facebook</SelectItem>
                                 </Select>
                             </div>
                             <div className='flex w-full gap-2 col-span'>
@@ -86,14 +121,13 @@ function Discover() {
                                     label="Category"
                                     labelPlacement='outside-left'
                                     placeholder="Category"
+                                    onChange={(e) => handleCategory(e)}
                                 >
-                                    <SelectItem className='outline-none w-[100px]'>Personal Branding</SelectItem>
-                                    <SelectItem className='outline-none w-[100px]'>Product</SelectItem>
-                                    <SelectItem className='outline-none w-[100px]'>Music</SelectItem>
-                                    <SelectItem className='outline-none w-[100px]'>Movie</SelectItem>
-                                    <SelectItem className='outline-none w-[100px]'>Apps</SelectItem>
-                                    <SelectItem className='outline-none w-[100px]'>Business</SelectItem>
-                                    <SelectItem className='outline-none w-[100px]'>Others</SelectItem>
+                                    <SelectItem className='outline-none w-full' key='personal-branding'>Personal Branding</SelectItem>
+                                    <SelectItem className='outline-none w-full' key='product'>Product</SelectItem>
+                                    <SelectItem className='outline-none w-full' key='music'>Music</SelectItem>
+                                    <SelectItem className='outline-none w-full' key='tech'>Technology</SelectItem>
+
 
                                 </Select>
                             </div>
@@ -105,7 +139,7 @@ function Discover() {
             <div className='mt-5 grid md:grid-cols-8 lg:grid-cols-12 gap-4 lg:gap-3 w-full'>
                 {discover.map((campaign, index) => (
                     <div key={index} className="col-span-4">
-                        <Link to={`campaign/${campaign.title}`} state={{ id: campaign._id, back:'/platform/discover' }}>
+                        <Link to={`campaign/${campaign.title}`} state={{ id: campaign._id, back: '/platform/discover' }}>
                             <InfoCard
                                 title={campaign.title}
                                 platforms={campaign.platforms}
@@ -114,6 +148,7 @@ function Discover() {
                                 paid={2000}
                                 createdBy={campaign.createdBy?.name || 'Unknown'}
                                 views={100000}
+                                category={campaign?.category}
                                 description={campaign.description}
                             />
                         </Link>
