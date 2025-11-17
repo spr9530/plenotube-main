@@ -36,7 +36,7 @@ export const AuthProvider = ({ children }) => {
 
         const checkAuth = async () => {
             try {
-                const res = await axios.get("http://localhost:5000/api/v1/auth/get-me", { withCredentials: true });
+                const res = await axios.get("https://plenotube-main.onrender.com/api/v1/auth/get-me", { withCredentials: true });
                 if (res.data.authenticated) {
                     setUserInfo(res.data.user);
                     setIsAuthenticated(true);
