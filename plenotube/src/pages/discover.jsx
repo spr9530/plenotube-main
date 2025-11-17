@@ -16,7 +16,7 @@ import { useState } from 'react';
 function Discover() {
 
     const { discover, discoverEnd, discoverLoading, getDiscover, setDiscover, setDiscoverEnd } = useCampaignContext()
-    const { userInfo } = useAuth();
+    const { userInfo, loading } = useAuth();
     const [page, setPage] = useState(1);
     const [platform, setPlatform] = useState('');
     const [category, setCategory] = useState('');
@@ -24,10 +24,10 @@ function Discover() {
     const firstFilterRun = useRef(true);
     
     useEffect(() => {
-        if (!userInfo || firstCallDone) return;
+        if (!userInfo || loading || firstCallDone) return;
         getDiscover(1);      // No filters for first load
         firstCallDone.current = true;
-    }, [userInfo]);
+    }, [userInfo, loading]);
 
 
     useEffect(() => {
@@ -76,10 +76,6 @@ function Discover() {
 
         getDiscover(1, '', '');
     };
-
-
-
-
 
 
     return (
