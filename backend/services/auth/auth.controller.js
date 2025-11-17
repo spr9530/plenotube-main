@@ -188,20 +188,24 @@ exports.verifySignUpOtp = async (req, res) => {
         await redisClient.del(`signup:${email}`);
         await OTP.deleteOne({ email });
         const token = await createToken({ userid: user._id, useremail: user.email, username: user.username });
-        res.cookie('user', {
-            info: {
-                id: user._id,
-                full_name: user.full_name,
-                email: user.email,
-                username: user.username
-            },
-            token
-        }, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
-            // maxAge: 24 * 60 * 60 * 1000 // 1 day
-        });
+        res.cookie(
+  "user",
+  JSON.stringify({
+    info: {
+      id: newUser._id,
+      full_name: newUser.full_name,
+      email: newUser.email,
+      username: newUser.username,
+    },
+    token,
+  }),
+  {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "None",
+  }
+);
+
         return res.json({ success: true, message: "OTP verified successfully (via DB fallback)", token, user });
 
     } catch (error) {
@@ -219,22 +223,27 @@ exports.createAccountViaGoogle = async (req, res) => {
         }
 
         // === 3️⃣ Check if user already exists ===
-        const existing = await User.findOne({  email });
+        const existing = await User.findOne({ email });
         if (existing && existing.isVerified) {
             const token = await createToken({ userid: existing?._id, useremail: existing?.email, username: existing?.username });
-            res.cookie('user', {
-                info: {
-                    id: existing._id,
-                    full_name: existing.full_name,
-                    email: existing.email,
-                    username: existing.username
-                },
-                token
-            }, {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                sameSite: 'strict',
-            });
+            res.cookie(
+                "user",
+                JSON.stringify({
+                    info: {
+                        id: newUser._id,
+                        full_name: newUser.full_name,
+                        email: newUser.email,
+                        username: newUser.username,
+                    },
+                    token,
+                }),
+                {
+                    httpOnly: true,
+                    secure: process.env.NODE_ENV === "production",
+                    sameSite: "None",
+                }
+            );
+
             return res.status(200).json({
                 success: true,
                 message: 'Login successful',
@@ -260,20 +269,24 @@ exports.createAccountViaGoogle = async (req, res) => {
 
         const token = await createToken({ userid: newUser?._id, useremail: newUser?.email, username: newUser?.username });
 
-        res.cookie('user', {
-            info: {
-                id: newUser._id,
-                full_name: newUser.full_name,
-                email: newUser.email,
-                username: newUser.username
-            },
-            token
-        }, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
-            // maxAge: 24 * 60 * 60 * 1000 // 1 day
-        });
+        res.cookie(
+            "user",
+            JSON.stringify({
+                info: {
+                    id: newUser._id,
+                    full_name: newUser.full_name,
+                    email: newUser.email,
+                    username: newUser.username,
+                },
+                token,
+            }),
+            {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === "production",
+                sameSite: "None",
+            }
+        );
+
 
         // ✅ Send success response
         return res.status(200).json({
@@ -319,20 +332,24 @@ exports.loginUserAccount = async (req, res) => {
         const token = createToken({ userid: user._id, useremail: user.email, username: user.username })
 
         // 🍪 Set HTTP-only cookie
-        res.cookie('user', {
-            info: {
-                id: user._id,
-                full_name: user.full_name,
-                email: user.email,
-                username: user.username
-            },
-            token
-        }, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
-            // maxAge: 24 * 60 * 60 * 1000 // 1 day
-        });
+        res.cookie(
+  "user",
+  JSON.stringify({
+    info: {
+      id: newUser._id,
+      full_name: newUser.full_name,
+      email: newUser.email,
+      username: newUser.username,
+    },
+    token,
+  }),
+  {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "None",
+  }
+);
+
 
         // ✅ Send success response
         return res.status(200).json({
