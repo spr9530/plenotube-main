@@ -133,13 +133,19 @@ exports.createNewCampaign = async (req, res) => {
 
 exports.getCampaigns = async (req, res) => {
   try {
-    const user = req.user;
-    if (!user) {
-      return res.status(401).json({
-        success: false,
-        message: "Unauthorized",
-      });
+    const rawUser = req.cookies.user;
+
+    if (!rawUser) {
+        return res.status(401).json({ authenticated: false, message: "Unauthorized" });
     }
+
+    let user;
+    try {
+        user = JSON.parse(rawUser);   // << Important
+    } catch (err) {
+        return res.status(400).json({ authenticated: false, message: "Invalid cookie format" });
+    }
+    
 
     // Query params
     let {
