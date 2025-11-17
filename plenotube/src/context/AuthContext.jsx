@@ -158,7 +158,7 @@ export const AuthProvider = ({ children }) => {
 
         try {
             // 1️⃣ Optional: call backend to clear cookies (if using withCredentials)
-            await axios.get("http://localhost:5000/api/v1/auth/logout", {
+            await axios.get("https://plenotube-main.onrender.com/api/v1/auth/logout", {
                 withCredentials: true,
             });
 
