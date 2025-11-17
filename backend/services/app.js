@@ -18,7 +18,7 @@ cloudinary.connectCloudinary()
 
 //Middleware
 app.use(cors({
-  origin: ['https://plenotube.netlify.app/', 'http://localhost:5173'], // allowed origins
+  origin: ['https://plenotube.netlify.app', 'http://localhost:5173'], // allowed origins
   credentials: true // allow cookies/auth headers
 }));
 
