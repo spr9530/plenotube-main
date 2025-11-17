@@ -22,10 +22,14 @@ function Discover() {
     const [category, setCategory] = useState('');
     const firstCallDone = useRef(false);
     const firstFilterRun = useRef(true);
-    
+
     useEffect(() => {
-        if (!userInfo || firstCallDone.current) return;
-        getDiscover(1);      // No filters for first load
+        if (firstCallDone.current) return;
+        if (!userInfo) return;
+         if (discoverLoading || discoverEnd || !discover.hasMore) return;
+        if(discover.length>0) return 
+
+        getDiscover(1);
         firstCallDone.current = true;
     }, [userInfo]);
 
