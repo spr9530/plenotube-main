@@ -21,6 +21,10 @@ app.use(cors({
   origin: ['https://plenotube.netlify.app', 'http://localhost:5173'], // allowed origins
   credentials: true // allow cookies/auth headers
 }));
+app.use((req, res, next) => {
+    res.removeHeader("Cross-Origin-Opener-Policy");
+    next();
+});
 
 app.use(express.json());
 app.use(cookieParser());
