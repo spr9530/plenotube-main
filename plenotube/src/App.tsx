@@ -15,7 +15,7 @@ import Payment from "@/pages/settings/payment"
 // import Balance from "@/pages/settings/Balance"
 import Danger from "@/pages/settings/danger"
 import CampaignInfo from "@/pages/campaignInfo/campaignInfo"
-import Submission from "@/pages/submission/submission"
+import Submission from "@/pages/submission/Submission"
 import ProtectedRoute from "./ProtectedRoute"
 import UserCampaign from "@/pages/userCampaign/userCampaign"
 
