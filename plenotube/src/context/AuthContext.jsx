@@ -118,6 +118,7 @@ export const AuthProvider = ({ children }) => {
                 setUserInfo(response.user);
                 setIsAuthenticated(true);
                 setLoading(false);
+                // sessionStorage.setItem("auth", JSON.stringify({ user: res.data.user, isAuthenticated: true, token: res.data.token }));
                 navigate(`/${redirectPath}`);
                 navigate('/platform')
             } catch (error) {
