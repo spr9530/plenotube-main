@@ -26,7 +26,6 @@ function Discover() {
     useEffect(() => {
         if (firstCallDone.current) return;
         if (!userInfo) return;
-         if (discoverLoading || discoverEnd || !discover.hasMore) return;
         if(discover.length>0) return 
 
         getDiscover(1);
